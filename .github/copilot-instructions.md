@@ -51,6 +51,9 @@
 - When work crosses roles, preserve traceability from requirement to design, implementation, tests, documentation, and operational readiness.
 - For user-facing changes, an approved design canvas is the source of truth for UI behavior, states, and accessibility expectations.
 
+## Exclusions
+- Never attempt any update on CODE_OF_CONDUCT.md, CONTRIBUTING.md, LICENSE, SECURITY.md or SUPPORT.md
+
 ## Validation
 
 - Use repository-provided build, lint, test, and documentation commands when they exist.
