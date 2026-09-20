@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Canvas mockup: &lt;screen name&gt;</title>
+    <!--
+      Self-contained desktop canvas mockup.
+      Rules:
+      - No external network dependencies, so the file opens reliably from the repository.
+      - Keep markup semantic; the mockup doubles as an accessibility reference.
+      - Use the state switcher to demonstrate every state described in canvas.md.
+    -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --surface: #ffffff;
+        --surface-muted: #f4f5f7;
+        --border: #d0d7de;
+        --text: #1f2328;
+        --text-muted: #57606a;
+        --accent: #0969da;
+        --danger: #b60205;
+        --radius: 8px;
+        --space: 16px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --surface: #0d1117;
+          --surface-muted: #161b22;
+          --border: #30363d;
+          --text: #e6edf3;
+          --text-muted: #9198a1;
+          --accent: #4493f8;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--surface-muted);
+        color: var(--text);
+      }
+      .canvas-bar {
+        display: flex;
+        gap: var(--space);
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 12px var(--space);
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+      .canvas-bar h1 { font-size: 14px; margin: 0; font-weight: 600; }
+      .canvas-bar p { margin: 0; font-size: 13px; color: var(--text-muted); }
+      .frame {
+        max-width: 1440px;
+        margin: var(--space) auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      header.app {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space);
+        padding: var(--space);
+        border-bottom: 1px solid var(--border);
+      }
+      .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 420px; }
+      nav.side { padding: var(--space); border-right: 1px solid var(--border); background: var(--surface-muted); }
+      nav.side ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+      nav.side a { display: block; padding: 8px; border-radius: 6px; color: var(--text); text-decoration: none; }
+      nav.side a[aria-current="page"] { background: var(--surface); font-weight: 600; }
+      main.content { padding: var(--space); }
+      .state { display: none; }
+      .state[data-active="true"] { display: block; }
+      .placeholder {
+        border: 1px dashed var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        color: var(--text-muted);
+      }
+      button {
+        font: inherit;
+        padding: 8px 14px;
+        min-height: 40px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+      }
+      button.primary { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+      :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+      [role="alert"] { color: var(--danger); font-weight: 600; }
+      @media (max-width: 1024px) {
+        .layout { grid-template-columns: 1fr; }
+        nav.side { border-right: 0; border-bottom: 1px solid var(--border); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas-bar">
+      <h1>Canvas preview</h1>
+      <p>Specification: canvas.md</p>
+      <label for="state-select">State</label>
+      <select id="state-select">
+        <option value="empty">Empty</option>
+        <option value="loading">Loading</option>
+        <option value="success" selected>Success</option>
+        <option value="error">Error</option>
+      </select>
+    </div>
+
+    <div class="frame">
+      <header class="app">
+        <strong>&lt;Product or screen name&gt;</strong>
+        <button class="primary" type="button">&lt;Primary action&gt;</button>
+      </header>
+
+      <div class="layout">
+        <nav class="side" aria-label="Primary">
+          <ul>
+            <li><a href="#main" aria-current="page">&lt;Section one&gt;</a></li>
+            <li><a href="#main">&lt;Section two&gt;</a></li>
+          </ul>
+        </nav>
+
+        <main class="content" id="main">
+          <section class="state" data-state="empty" aria-labelledby="empty-heading">
+            <h2 id="empty-heading">&lt;Empty state heading&gt;</h2>
+            <p>&lt;Explain what is missing and what to do next.&gt;</p>
+            <button class="primary" type="button">&lt;Primary action&gt;</button>
+          </section>
+
+          <section class="state" data-state="loading" aria-labelledby="loading-heading">
+            <h2 id="loading-heading">&lt;Loading heading&gt;</h2>
+            <p role="status">Loading&#8230;</p>
+            <div class="placeholder">&lt;Skeleton or progress representation&gt;</div>
+          </section>
+
+          <section class="state" data-state="success" data-active="true" aria-labelledby="success-heading">
+            <h2 id="success-heading">&lt;Success state heading&gt;</h2>
+            <div class="placeholder">&lt;Primary content: table, cards, form, or detail view&gt;</div>
+          </section>
+
+          <section class="state" data-state="error" aria-labelledby="error-heading">
+            <h2 id="error-heading">&lt;Error state heading&gt;</h2>
+            <p role="alert">&lt;What failed, in plain language.&gt;</p>
+            <button type="button">Retry</button>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const select = document.getElementById("state-select");
+      const states = document.querySelectorAll(".state");
+      select.addEventListener("change", () => {
+        states.forEach((section) => {
+          section.dataset.active = String(section.dataset.state === select.value);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,99 @@
+name: Feature
+description: A distinct capability that delivers value on its own.
+title: "[Feature]: "
+labels:
+  - "type: feature"
+  - "status: needs triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a feature for a capability that can be designed, built, and validated as a unit.
+        Focus on the problem and the required behavior. Acceptance criteria must be testable.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is not possible or not working well today? Avoid describing the solution here.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed capability
+      description: What should the system do? Describe observable behavior rather than internal design.
+    validations:
+      required: true
+  - type: textarea
+    id: users
+    attributes:
+      label: Users and value
+      description: Who benefits, and what value do they gain?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Observable, testable outcomes. Include boundary and failure behavior where relevant.
+      value: |
+        - [ ] Given ..., when ..., then ...
+        - [ ] Given ..., when ..., then ...
+    validations:
+      required: true
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Out of scope
+      description: What this feature will not address.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches evaluated and why they were not chosen.
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and risks
+      description: Blocking work, external systems, migrations, performance, security, or compliance concerns.
+  - type: textarea
+    id: test-notes
+    attributes:
+      label: Test notes
+      description: How should this be verified? Note critical paths, edge cases, and data requirements.
+  - type: textarea
+    id: docs-notes
+    attributes:
+      label: Documentation notes
+      description: Which documentation must change, and for which audience?
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Proposed priority. Maintainers may adjust this during triage.
+      options:
+        - Critical - blocks committed delivery
+        - High - needed for the current milestone
+        - Medium - valuable, not urgent
+        - Low - opportunistic
+    validations:
+      required: true
+  - type: input
+    id: parent-epic
+    attributes:
+      label: Parent epic
+      description: Link the parent epic, if one exists.
+      placeholder: "#123"
+  - type: checkboxes
+    id: quality-gate
+    attributes:
+      label: Readiness checklist
+      options:
+        - label: I searched existing issues and this feature is not a duplicate.
+          required: true
+        - label: Every acceptance criterion is observable and testable.
+          required: true
+        - label: This issue contains no secrets, credentials, or personal data.
+          required: true

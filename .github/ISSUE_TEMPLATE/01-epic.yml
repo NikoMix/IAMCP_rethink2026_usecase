@@ -1,0 +1,97 @@
+name: Epic
+description: A large outcome delivered through multiple features over time.
+title: "[Epic]: "
+labels:
+  - "type: epic"
+  - "status: needs triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use an epic for a significant outcome that cannot be delivered in a single release-ready change.
+        Describe the outcome and success measures here, and keep solution detail in the child features.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What will be true when this epic is complete? Describe the end state, not the implementation.
+      placeholder: Workshop participants can complete the end-to-end demo without manual setup steps.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and business value
+      description: What problem does this solve, for whom, and why is it worth doing now?
+    validations:
+      required: true
+  - type: textarea
+    id: success-measures
+    attributes:
+      label: Success measures
+      description: How will success be measured? Prefer observable metrics or explicit qualitative checks.
+      placeholder: |
+        - Setup time reduced from 30 minutes to under 5 minutes
+        - Zero manual credential steps required
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: In scope
+      description: List the major capabilities this epic includes.
+    validations:
+      required: true
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Out of scope
+      description: List what this epic deliberately excludes, to prevent scope creep.
+    validations:
+      required: true
+  - type: textarea
+    id: child-work
+    attributes:
+      label: Child features and stories
+      description: Link known child issues. Leave placeholders if they do not exist yet.
+      placeholder: |
+        - [ ] #
+        - [ ] #
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and constraints
+      description: External teams, systems, approvals, budget, compliance, or sequencing constraints.
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and assumptions
+      description: What could prevent success, and what are you assuming to be true?
+  - type: textarea
+    id: open-questions
+    attributes:
+      label: Open questions
+      description: Decisions still required, and who needs to make them.
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Proposed priority. Maintainers may adjust this during triage.
+      options:
+        - Critical - blocks committed delivery
+        - High - needed for the current milestone
+        - Medium - valuable, not urgent
+        - Low - opportunistic
+    validations:
+      required: true
+  - type: checkboxes
+    id: quality-gate
+    attributes:
+      label: Readiness checklist
+      options:
+        - label: I searched existing issues and this epic is not a duplicate.
+          required: true
+        - label: The outcome is described independently of a specific implementation.
+          required: true
+        - label: This issue contains no secrets, credentials, or personal data.
+          required: true

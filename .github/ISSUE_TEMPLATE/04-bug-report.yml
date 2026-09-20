@@ -1,0 +1,117 @@
+name: Bug Report
+description: Something is not working as expected.
+title: "[Bug]: "
+labels:
+  - "type: bug"
+  - "status: needs triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Reproduction steps are the most valuable part of this report.
+
+        Do not report security vulnerabilities here. Follow the security policy instead.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Exact, ordered steps. Include commands, inputs, and test data where possible.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead? Include the full error message if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs and output
+      description: Paste relevant output. Redact secrets, tokens, and personal data.
+      render: shell
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is the impact?
+      options:
+        - Critical - data loss, security impact, or complete outage
+        - High - core functionality broken, no workaround
+        - Medium - functionality impaired, workaround exists
+        - Low - minor or cosmetic
+    validations:
+      required: true
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: Reproducibility
+      options:
+        - Always
+        - Often
+        - Intermittent
+        - Observed once
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Release, tag, branch, or commit SHA where you observed this.
+      placeholder: "main @ 0a1b2c3"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, runtime, browser, tooling versions, and deployment context.
+      value: |
+        - OS:
+        - Runtime or tooling version:
+        - Browser (if applicable):
+        - Environment (local, CI, staging, production):
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and workaround
+      description: Who is affected, how many users, and is there a workaround?
+  - type: textarea
+    id: regression
+    attributes:
+      label: Regression details
+      description: If this worked before, note the last known good version and any recent related change.
+  - type: checkboxes
+    id: quality-gate
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this bug is not already reported.
+          required: true
+        - label: I can reproduce this on the latest available version, or I explained why I cannot.
+          required: true
+        - label: Logs and attachments contain no secrets, credentials, or personal data.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

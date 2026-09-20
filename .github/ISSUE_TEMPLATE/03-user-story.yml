@@ -1,0 +1,90 @@
+name: User Story
+description: A single user-facing change that can be delivered and validated independently.
+title: "[Story]: "
+labels:
+  - "type: user story"
+  - "status: needs triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a user story for the smallest change that delivers standalone user value.
+        If it cannot be completed and verified on its own, file a feature or an epic instead.
+  - type: textarea
+    id: story
+    attributes:
+      label: User story
+      description: State the user, the goal, and the benefit.
+      value: |
+        As a <type of user>,
+        I want <capability>,
+        so that <benefit>.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Current behavior, relevant background, and why this matters now.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Testable conditions that define done. Include negative and boundary cases where relevant.
+      value: |
+        - [ ] Given ..., when ..., then ...
+        - [ ] Given ..., when ..., then ...
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Related work deliberately excluded from this story.
+  - type: input
+    id: design-canvas
+    attributes:
+      label: Design canvas
+      description: Path to the design canvas under `design/canvases/`, if this story has user-facing UI. Leave blank if a canvas is not needed yet.
+      placeholder: design/canvases/007-workshop-dashboard/
+  - type: textarea
+    id: test-notes
+    attributes:
+      label: Test notes
+      description: Scenarios, test data, or environments needed to verify this story.
+  - type: textarea
+    id: docs-notes
+    attributes:
+      label: Documentation notes
+      description: User-facing documentation or release note changes required.
+  - type: dropdown
+    id: size
+    attributes:
+      label: Estimated size
+      description: Rough effort estimate. Split the story if it is larger than Large.
+      options:
+        - Small - under a day
+        - Medium - one to three days
+        - Large - up to a week
+        - Unknown - needs refinement
+    validations:
+      required: true
+  - type: input
+    id: parent
+    attributes:
+      label: Parent feature or epic
+      description: Link the parent issue, if one exists.
+      placeholder: "#123"
+  - type: checkboxes
+    id: quality-gate
+    attributes:
+      label: Readiness checklist
+      options:
+        - label: I searched existing issues and this story is not a duplicate.
+          required: true
+        - label: This story delivers value on its own and can be verified independently.
+          required: true
+        - label: This issue contains no secrets, credentials, or personal data.
+          required: true

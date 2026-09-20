@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or support request
+    url: https://github.com/NikoMix/IAMCP_rethink2026_usecase/blob/main/SUPPORT.md
+    about: Ask a question or request help instead of filing tracked work.
+  - name: Report a security vulnerability
+    url: https://github.com/NikoMix/IAMCP_rethink2026_usecase/blob/main/SECURITY.md
+    about: Report security issues privately. Never disclose vulnerabilities in a public issue.
