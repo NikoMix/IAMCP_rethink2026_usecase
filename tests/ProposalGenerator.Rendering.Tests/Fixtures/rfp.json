@@ -1,0 +1,54 @@
+{
+  "document": {
+    "type": "rfp",
+    "number": "RFP-2026-004",
+    "version": "1.0",
+    "date": "2026-02-02",
+    "status": "final",
+    "language": "en",
+    "confidentiality": "Confidential",
+    "references": [
+      { "type": "rfi", "number": "RFI-2026-003", "version": "1.0", "date": "2026-01-12" }
+    ]
+  },
+  "customer": {
+    "name": "Contoso Handel AG",
+    "profile": "Contoso Handel AG is a fictional retailer with stores in southern Germany.",
+    "contact": { "name": "Jana Probe", "email": "jana.probe@contoso.example" }
+  },
+  "project": {
+    "name": "Customer Portal Modernisation",
+    "summary": "Contoso requests proposals to modernise its customer portal.",
+    "background": "The current portal runs on an unsupported framework.",
+    "objectives": ["Reduce page load time below two seconds", "Retire the legacy hosting platform"],
+    "start_date": "2026-04-01",
+    "end_date": "2026-09-30"
+  },
+  "pricing": { "model": "fixed_price", "currency": "EUR" },
+  "rfp": {
+    "rfi_reference": "RFI-2026-003",
+    "scope": {
+      "in_scope": ["Architecture and migration design", "Re-implementation of the order history pages"],
+      "out_of_scope": ["Changes to the ERP system"]
+    },
+    "requirements": [
+      { "id": "R1", "category": "Performance", "text": "Pages load in under two seconds at peak load.", "priority": "must" },
+      { "id": "R2", "category": "Operations", "text": "The platform is monitored around the clock.", "priority": "should" }
+    ],
+    "deliverables": [
+      { "name": "Target architecture", "description": "Architecture document including migration plan." }
+    ],
+    "evaluation_criteria": [
+      { "name": "Solution quality", "weight": 50 },
+      { "name": "Price", "weight": 30 },
+      { "name": "References", "weight": 20 }
+    ],
+    "submission_deadline": "2026-02-27",
+    "questions_deadline": "2026-02-13",
+    "price_validity_days": 90,
+    "timeline": [
+      { "name": "Proposal due", "date": "2026-02-27" },
+      { "name": "Award", "date": "2026-03-13" }
+    ]
+  }
+}
