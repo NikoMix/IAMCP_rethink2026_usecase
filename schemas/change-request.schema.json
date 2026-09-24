@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/NikoMix/IAMCP_rethink2026_usecase/main/schemas/change-request.schema.json",
+  "title": "Change Request (CR)",
+  "description": "Data for templates/change-request.md. A change request amends a SOW (sow.reference). All cr.impact amounts are in pricing.currency.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["document", "supplier", "customer", "sow", "cr", "pricing"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "document": {
+      "$ref": "common.schema.json#/$defs/document",
+      "properties": { "type": { "const": "change-request" } }
+    },
+    "supplier": { "$ref": "common.schema.json#/$defs/party" },
+    "customer": { "$ref": "common.schema.json#/$defs/party" },
+    "sow": {
+      "description": "SOW amended by this change request.",
+      "$ref": "common.schema.json#/$defs/governingDocument"
+    },
+    "msa": {
+      "description": "Governing Master Service Agreement, if known.",
+      "$ref": "common.schema.json#/$defs/governingDocument"
+    },
+    "pricing": {
+      "description": "Only the currency is used; it applies to every cr.impact amount.",
+      "$ref": "common.schema.json#/$defs/pricing",
+      "required": ["currency"]
+    },
+    "cr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "requested_by", "description", "reason", "impact"],
+      "properties": {
+        "title": { "$ref": "common.schema.json#/$defs/text" },
+        "requested_by": { "$ref": "common.schema.json#/$defs/text" },
+        "priority": { "$ref": "common.schema.json#/$defs/priority" },
+        "decision_due": { "$ref": "common.schema.json#/$defs/date" },
+        "description": { "$ref": "common.schema.json#/$defs/text" },
+        "reason": { "$ref": "common.schema.json#/$defs/text" },
+        "scope_changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "proposed"],
+            "properties": {
+              "type": { "enum": ["add", "modify", "remove"] },
+              "section": { "$ref": "common.schema.json#/$defs/text" },
+              "current": { "$ref": "common.schema.json#/$defs/text" },
+              "proposed": { "$ref": "common.schema.json#/$defs/text" }
+            }
+          }
+        },
+        "impact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cost", "schedule"],
+          "properties": {
+            "cost": {
+              "description": "Net change of the SOW value; negative for a reduction.",
+              "$ref": "common.schema.json#/$defs/signedAmount"
+            },
+            "cost_items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["item", "amount"],
+                "properties": {
+                  "item": { "$ref": "common.schema.json#/$defs/text" },
+                  "category": { "$ref": "common.schema.json#/$defs/text" },
+                  "quantity": { "type": "number" },
+                  "rate": { "$ref": "common.schema.json#/$defs/amount" },
+                  "amount": { "$ref": "common.schema.json#/$defs/signedAmount" }
+                }
+              }
+            },
+            "original_value": {
+              "description": "SOW value before this change (pricing.total of the SOW, see #13).",
+              "$ref": "common.schema.json#/$defs/amount"
+            },
+            "revised_value": {
+              "description": "SOW value after this change; check_plausibility checks original_value + cost.",
+              "$ref": "common.schema.json#/$defs/amount"
+            },
+            "schedule": {
+              "description": "Narrative schedule impact; use \"No schedule impact.\" when there is none.",
+              "$ref": "common.schema.json#/$defs/text"
+            },
+            "milestones": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "current_date", "revised_date"],
+                "properties": {
+                  "name": { "$ref": "common.schema.json#/$defs/text" },
+                  "current_date": { "$ref": "common.schema.json#/$defs/date" },
+                  "revised_date": { "$ref": "common.schema.json#/$defs/date" }
+                }
+              }
+            },
+            "resources": { "$ref": "common.schema.json#/$defs/text" },
+            "risks": { "$ref": "common.schema.json#/$defs/risks" }
+          }
+        },
+        "assumptions": { "$ref": "common.schema.json#/$defs/assumptions" }
+      }
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/NikoMix/IAMCP_rethink2026_usecase/main/schemas/rfp.schema.json",
+  "title": "Request for Proposal (RFP)",
+  "description": "Data for templates/rfp.md. An RFP may follow an RFI (rfp.rfi_reference) and may name a governing MSA (msa.reference).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["document", "customer", "project", "rfp"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "document": {
+      "$ref": "common.schema.json#/$defs/document",
+      "properties": { "type": { "const": "rfp" } }
+    },
+    "customer": {
+      "$ref": "common.schema.json#/$defs/party",
+      "required": ["name", "contact"],
+      "properties": {
+        "contact": {
+          "$ref": "common.schema.json#/$defs/contact",
+          "required": ["name", "email"]
+        }
+      }
+    },
+    "project": {
+      "$ref": "common.schema.json#/$defs/project",
+      "required": ["name", "summary", "objectives"]
+    },
+    "msa": {
+      "description": "Existing Master Service Agreement that will govern the engagement, if any.",
+      "$ref": "common.schema.json#/$defs/governingDocument"
+    },
+    "pricing": {
+      "description": "Commercial requirements for bidders; typically only currency and preferred model.",
+      "$ref": "common.schema.json#/$defs/pricing"
+    },
+    "rfp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirements", "evaluation_criteria", "submission_deadline"],
+      "properties": {
+        "rfi_reference": {
+          "description": "Number of the preceding RFI; must match the rfi entry in document.references.",
+          "$ref": "common.schema.json#/$defs/documentNumber"
+        },
+        "scope": { "$ref": "common.schema.json#/$defs/scope" },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "text", "priority"],
+            "properties": {
+              "id": { "$ref": "common.schema.json#/$defs/identifier" },
+              "category": { "$ref": "common.schema.json#/$defs/text" },
+              "text": { "$ref": "common.schema.json#/$defs/text" },
+              "priority": {
+                "description": "MoSCoW priority.",
+                "enum": ["must", "should", "could", "wont"]
+              }
+            }
+          }
+        },
+        "deliverables": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/deliverable" }
+        },
+        "evaluation_criteria": {
+          "description": "Weights in percent; check_plausibility checks that they total 100.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "weight"],
+            "properties": {
+              "name": { "$ref": "common.schema.json#/$defs/text" },
+              "weight": { "$ref": "common.schema.json#/$defs/percentage" }
+            }
+          }
+        },
+        "submission_deadline": { "$ref": "common.schema.json#/$defs/date" },
+        "questions_deadline": { "$ref": "common.schema.json#/$defs/date" },
+        "price_validity_days": { "$ref": "common.schema.json#/$defs/positiveInteger" },
+        "timeline": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/milestone" }
+        }
+      }
+    }
+  }
+}

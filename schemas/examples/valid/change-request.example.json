@@ -1,0 +1,52 @@
+{
+  "$schema": "../../change-request.schema.json",
+  "document": {
+    "type": "change-request",
+    "number": "CR-2026-001",
+    "version": "1.0",
+    "date": "2026-06-10",
+    "status": "draft",
+    "language": "en",
+    "references": [
+      { "type": "sow", "number": "SOW-2026-001", "version": "1.0", "date": "2026-03-16" },
+      { "type": "msa", "number": "MSA-2026-001", "version": "1.0", "date": "2026-03-02" }
+    ]
+  },
+  "supplier": {
+    "name": "Fabrikam Consulting GmbH",
+    "signatory": { "name": "Max Muster", "title": "Managing Director" }
+  },
+  "customer": {
+    "name": "Contoso Handel AG",
+    "signatory": { "name": "Paul Platzhalter", "title": "Member of the Board" }
+  },
+  "sow": { "reference": "SOW-2026-001", "version": "1.0", "date": "2026-03-16" },
+  "msa": { "reference": "MSA-2026-001", "version": "1.0", "date": "2026-03-02" },
+  "pricing": { "currency": "EUR" },
+  "cr": {
+    "title": "Add a returns page to the customer portal",
+    "requested_by": "Contoso Handel AG, product owner",
+    "priority": "medium",
+    "decision_due": "2026-06-24",
+    "description": "Add a self-service returns page to the modernised portal.",
+    "reason": "Customers currently request returns by phone, which binds call-centre capacity.",
+    "scope_changes": [
+      { "type": "add", "section": "2.1", "current": "Not included", "proposed": "Self-service returns page" }
+    ],
+    "impact": {
+      "cost": 12000,
+      "cost_items": [
+        { "item": "Returns page", "category": "Developer", "quantity": 12, "rate": 1000, "amount": 12000 }
+      ],
+      "original_value": 184000,
+      "revised_value": 196000,
+      "schedule": "Go-live moves by two weeks.",
+      "milestones": [
+        { "name": "Go-live", "current_date": "2026-09-15", "revised_date": "2026-09-29" }
+      ],
+      "resources": "One additional developer for three weeks.",
+      "risks": ["The returns API of the ERP system may not be available in time"]
+    },
+    "assumptions": ["The ERP returns API is documented"]
+  }
+}

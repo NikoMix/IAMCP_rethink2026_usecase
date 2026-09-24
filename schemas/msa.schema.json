@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/NikoMix/IAMCP_rethink2026_usecase/main/schemas/msa.schema.json",
+  "title": "Master Service Agreement (MSA)",
+  "description": "Data for templates/msa.md. SOWs and change requests reference the MSA by document.number and document.version.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["document", "supplier", "customer", "legal"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "document": {
+      "$ref": "common.schema.json#/$defs/document",
+      "properties": { "type": { "const": "msa" } }
+    },
+    "supplier": {
+      "$ref": "common.schema.json#/$defs/party",
+      "required": ["name", "address", "signatory"]
+    },
+    "customer": {
+      "$ref": "common.schema.json#/$defs/party",
+      "required": ["name", "address", "signatory"]
+    },
+    "legal": {
+      "$ref": "common.schema.json#/$defs/legal",
+      "required": ["governing_law", "jurisdiction", "payment_terms_days", "liability_cap"]
+    }
+  }
+}

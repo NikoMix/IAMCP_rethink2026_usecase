@@ -1,0 +1,62 @@
+{
+  "change-request.cost-as-text.json": {
+    "documentType": "change-request",
+    "path": "cr.impact.cost",
+    "keyword": "type"
+  },
+  "change-request.missing-sow-reference.json": {
+    "documentType": "change-request",
+    "path": "sow.reference",
+    "keyword": "required"
+  },
+  "msa.liability-cap-amount-as-text.json": {
+    "documentType": "msa",
+    "path": "legal.liability_cap.amount",
+    "keyword": "type"
+  },
+  "msa.missing-liability-cap.json": {
+    "documentType": "msa",
+    "path": "legal.liability_cap",
+    "keyword": "required"
+  },
+  "rfi.missing-questions.json": {
+    "documentType": "rfi",
+    "path": "rfi.questions",
+    "keyword": "required"
+  },
+  "rfi.non-iso-response-deadline.json": {
+    "documentType": "rfi",
+    "path": "rfi.response_deadline",
+    "keyword": "pattern"
+  },
+  "rfp.missing-submission-deadline.json": {
+    "documentType": "rfp",
+    "path": "rfp.submission_deadline",
+    "keyword": "required"
+  },
+  "rfp.unknown-requirement-priority.json": {
+    "documentType": "rfp",
+    "path": "rfp.requirements[0].priority",
+    "keyword": "enum"
+  },
+  "sow.missing-customer-name.json": {
+    "documentType": "sow",
+    "path": "customer.name",
+    "keyword": "required"
+  },
+  "sow.total-as-text.json": {
+    "documentType": "sow",
+    "path": "pricing.total",
+    "keyword": "type"
+  },
+  "sow.unknown-property.json": {
+    "documentType": "sow",
+    "path": "project.budget",
+    "keyword": "additionalProperties"
+  },
+  "sow.wrong-document-type.json": {
+    "documentType": "sow",
+    "path": "document.type",
+    "keyword": "const"
+  }
+}
