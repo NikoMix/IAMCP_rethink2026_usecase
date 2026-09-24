@@ -1,0 +1,40 @@
+# Declarative definition of the proposal agent in the Foundry Agent Service.
+# Deploy it with src/ProposalGenerator.Agent.Cli; see agent/README.md.
+# ${NAME} values are resolved from configuration (environment variables) at deploy time.
+schemaVersion: 1
+name: proposal-agent
+version: 1.0.0
+description: >-
+  Collects the data for RFI, RFP, MSA, SOW and change request documents in a guided dialog
+  and returns schema-valid JSON for the proposal generator.
+model:
+  deployment: ${FOUNDRY_MODEL_DEPLOYMENT_NAME}
+  temperature: 0.2
+instructions: instructions.md
+tools:
+  - type: file_search
+    vectorStoreIds:
+      - ${FOUNDRY_VECTOR_STORE_ID}
+  - type: function
+    name: check_plausibility
+    description: >-
+      Deterministic plausibility checks for a document (sums, date order, weights, currency).
+      Returns findings with JSON paths and tool-computed totals in "computed". Use the computed
+      totals instead of calculating them yourself.
+    parameters: tools/check_plausibility.parameters.json
+    strict: false
+responseFormat:
+  type: json_schema
+  name: proposal_agent_response
+  # Strict mode stays off: the bundled document schemas exceed the strict-mode limits
+  # (100 properties, five nesting levels, no pattern/format/minItems). Every reply is
+  # validated locally against the original schemas instead; see agent/README.md.
+  strict: false
+  envelope: response-envelope.schema.json
+  schemaDirectory: ../schemas
+  documentTypes:
+    - rfi
+    - rfp
+    - msa
+    - sow
+    - change-request

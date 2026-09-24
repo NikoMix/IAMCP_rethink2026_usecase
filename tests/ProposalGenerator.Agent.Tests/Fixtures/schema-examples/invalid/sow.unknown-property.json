@@ -1,0 +1,177 @@
+{
+  "$schema": "../../sow.schema.json",
+  "document": {
+    "type": "sow",
+    "number": "SOW-2026-001",
+    "version": "1.0",
+    "date": "2026-03-16",
+    "status": "draft",
+    "language": "en",
+    "confidentiality": "Confidential",
+    "created_by": {
+      "name": "Erika Beispiel",
+      "email": "erika.beispiel@fabrikam.example"
+    },
+    "references": [
+      {
+        "type": "msa",
+        "number": "MSA-2026-001",
+        "version": "1.0",
+        "date": "2026-03-02"
+      }
+    ]
+  },
+  "supplier": {
+    "name": "Fabrikam Consulting GmbH",
+    "address": {
+      "street": "Beispielweg 1",
+      "postal_code": "10115",
+      "city": "Berlin",
+      "country": "DE"
+    },
+    "signatory": {
+      "name": "Max Muster",
+      "title": "Managing Director"
+    }
+  },
+  "customer": {
+    "name": "Contoso Handel AG",
+    "address": {
+      "street": "Musterstraße 5",
+      "postal_code": "80331",
+      "city": "München",
+      "country": "DE"
+    },
+    "signatory": {
+      "name": "Paul Platzhalter",
+      "title": "Member of the Board"
+    }
+  },
+  "msa": {
+    "reference": "MSA-2026-001",
+    "version": "1.0",
+    "date": "2026-03-02"
+  },
+  "project": {
+    "name": "Customer Portal Modernisation",
+    "summary": "Fabrikam modernises the Contoso customer portal and moves it to a managed cloud platform.",
+    "background": "The current portal runs on an unsupported framework and cannot be scaled for seasonal peaks.",
+    "objectives": [
+      "Reduce page load time below two seconds",
+      "Retire the legacy hosting platform by the end of the project"
+    ],
+    "start_date": "2026-04-01",
+    "end_date": "2026-09-30",
+    "budget": 184000
+  },
+  "sow": {
+    "scope": {
+      "in_scope": [
+        "Architecture and migration design",
+        "Re-implementation of the order history pages",
+        "Load testing"
+      ],
+      "out_of_scope": [
+        "Changes to the ERP system",
+        "Content migration"
+      ]
+    },
+    "phases": [
+      {
+        "name": "Discovery",
+        "description": "Assess the current portal and agree the target architecture."
+      },
+      {
+        "name": "Delivery",
+        "description": "Implement, test and hand over the modernised portal."
+      }
+    ],
+    "deliverables": [
+      {
+        "id": "D1",
+        "name": "Target architecture",
+        "description": "Architecture document including migration plan.",
+        "acceptance_criteria": "Approved by the Contoso architecture board.",
+        "due_date": "2026-05-15"
+      },
+      {
+        "id": "D2",
+        "name": "Modernised portal",
+        "description": "Production-ready portal on the managed platform.",
+        "acceptance_criteria": "All acceptance tests pass and page load time is below two seconds.",
+        "due_date": "2026-09-15"
+      }
+    ],
+    "milestones": [
+      {
+        "name": "Architecture approved",
+        "date": "2026-05-15",
+        "deliverables": [
+          "D1"
+        ]
+      },
+      {
+        "name": "Go-live",
+        "date": "2026-09-15",
+        "deliverables": [
+          "D2"
+        ]
+      }
+    ],
+    "roles": [
+      {
+        "role": "Project manager",
+        "party": "supplier",
+        "name": "Erika Beispiel",
+        "responsibilities": "Planning, reporting and risk management"
+      },
+      {
+        "role": "Product owner",
+        "party": "customer",
+        "responsibilities": "Prioritisation and acceptance"
+      }
+    ],
+    "customer_dependencies": [
+      "Access to the test environment by 2026-04-01"
+    ],
+    "assumptions": [
+      "The existing APIs remain stable during the project"
+    ],
+    "acceptance_days": 10,
+    "reporting_cadence": "weekly",
+    "steering_cadence": "monthly"
+  },
+  "pricing": {
+    "model": "fixed_price",
+    "currency": "EUR",
+    "total": 184000,
+    "rate_card": [
+      {
+        "role": "Senior consultant",
+        "daily_rate": 1200,
+        "days": 80,
+        "subtotal": 96000
+      },
+      {
+        "role": "Developer",
+        "daily_rate": 1000,
+        "days": 88,
+        "subtotal": 88000
+      }
+    ],
+    "payment_schedule": [
+      {
+        "trigger": "Acceptance of D1",
+        "amount": 55200,
+        "date": "2026-05-15"
+      },
+      {
+        "trigger": "Acceptance of D2",
+        "amount": 128800,
+        "date": "2026-09-15"
+      }
+    ],
+    "expenses_policy": "Pre-approved travel expenses are reimbursed at cost.",
+    "tax_note": "All amounts exclude value-added tax."
+  }
+}

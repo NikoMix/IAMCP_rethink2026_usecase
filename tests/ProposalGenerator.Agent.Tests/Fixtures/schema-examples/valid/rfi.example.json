@@ -1,0 +1,40 @@
+{
+  "$schema": "../../rfi.schema.json",
+  "document": {
+    "type": "rfi",
+    "number": "RFI-2026-003",
+    "version": "1.0",
+    "date": "2026-01-12",
+    "status": "final",
+    "language": "de",
+    "confidentiality": "Vertraulich"
+  },
+  "customer": {
+    "name": "Contoso Handel AG",
+    "profile": "Contoso Handel AG ist ein fiktiver Einzelhändler mit Filialen in Süddeutschland.",
+    "contact": { "name": "Jana Probe", "role": "Einkauf", "email": "jana.probe@contoso.example", "phone": "+49 89 0000 0002" }
+  },
+  "project": {
+    "name": "Modernisierung des Kundenportals",
+    "summary": "Contoso sucht Partner für die Modernisierung seines Kundenportals.",
+    "background": "Das bestehende Portal läuft auf einer nicht mehr unterstützten Plattform."
+  },
+  "rfi": {
+    "response_deadline": "2026-01-30",
+    "questions_deadline": "2026-01-21",
+    "purposes": ["Marktüberblick gewinnen", "Geeignete Anbieter für eine Ausschreibung identifizieren"],
+    "areas_of_interest": [
+      { "title": "Cloud-Migration", "description": "Erfahrung mit der Migration von Webportalen in verwaltete Cloud-Plattformen" }
+    ],
+    "region": "Deutschland",
+    "questions": [
+      { "text": "Welche vergleichbaren Projekte haben Sie umgesetzt?", "guidance": "Maximal drei Referenzen" },
+      { "text": "Welches Vorgehensmodell empfehlen Sie?" }
+    ],
+    "response_format": "PDF, höchstens zehn Seiten",
+    "timeline": [
+      { "name": "Antwortfrist", "date": "2026-01-30" },
+      { "name": "Geplante Ausschreibung", "date": "2026-02-02" }
+    ]
+  }
+}

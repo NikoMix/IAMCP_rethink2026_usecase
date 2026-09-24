@@ -1,0 +1,39 @@
+{
+  "document": {
+    "type": "sow",
+    "number": "SOW-2026-001",
+    "version": "1.0",
+    "date": "2026-09-01",
+    "status": "draft",
+    "language": "de"
+  },
+  "supplier": { "name": "Contoso Consulting GmbH" },
+  "customer": { "name": "Fabrikam AG" },
+  "msa": { "reference": "MSA-2026-001" },
+  "project": {
+    "name": "Copilot-Rollout",
+    "summary": "Einführung von Microsoft 365 Copilot für 500 Mitarbeitende.",
+    "objectives": ["Copilot für alle Vertriebsteams bereitstellen"]
+  },
+  "sow": {
+    "scope": { "in_scope": ["Pilotierung", "Rollout", "Schulung"] },
+    "deliverables": [
+      {
+        "id": "D1",
+        "name": "Rollout-Konzept",
+        "acceptance_criteria": "Vom Kunden freigegeben",
+        "due_date": "2026-10-15"
+      }
+    ],
+    "milestones": [{ "name": "Kick-off", "date": "2026-09-15" }]
+  },
+  "pricing": {
+    "model": "fixed_price",
+    "currency": "EUR",
+    "total": 48000,
+    "payment_schedule": [
+      { "trigger": "Kick-off", "amount": 24000 },
+      { "trigger": "Abnahme Rollout-Konzept", "amount": 24000 }
+    ]
+  }
+}

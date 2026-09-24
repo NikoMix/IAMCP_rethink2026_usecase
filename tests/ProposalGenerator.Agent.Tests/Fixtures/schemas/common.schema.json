@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/NikoMix/IAMCP_rethink2026_usecase/main/schemas/common.schema.json",
+  "title": "Proposal generator shared definitions",
+  "description": "Definitions shared by every document type schema. Reference them as common.schema.json#/$defs/<name>.",
+  "$defs": {
+    "text": {
+      "description": "Non-empty text. Whitespace-only values are rejected so that a required field is never rendered empty.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "textList": {
+      "description": "List of non-empty text items, for example bullet points.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/text" }
+    },
+    "identifier": {
+      "description": "Short identifier such as a deliverable or requirement ID.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,63}$"
+    },
+    "documentNumber": {
+      "description": "Business number of a document, for example SOW-2026-001.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,63}$"
+    },
+    "version": {
+      "description": "Document version, for example 1.0 or 1.2.0.",
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+){0,2}$"
+    },
+    "date": {
+      "description": "Calendar date in ISO 8601 extended format (YYYY-MM-DD).",
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+    },
+    "period": {
+      "description": "Closed date interval. That end is not before start is checked by check_plausibility, not by the schema.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "$ref": "#/$defs/date" },
+        "end": { "$ref": "#/$defs/date" }
+      }
+    },
+    "duration": {
+      "description": "ISO 8601 duration, for example P3M or P10D.",
+      "type": "string",
+      "pattern": "^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+S)?)?$"
+    },
+    "currencyCode": {
+      "description": "ISO 4217 alphabetic currency code, for example EUR. The schema checks the shape; check_plausibility may check membership.",
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "amount": {
+      "description": "Non-negative decimal amount. Its currency is the enclosing pricing.currency unless the amount is part of a money object. Text such as \"12000\" is rejected.",
+      "type": "number",
+      "minimum": 0
+    },
+    "signedAmount": {
+      "description": "Decimal amount that may be negative, for example the net change of a change request. Its currency is pricing.currency.",
+      "type": "number"
+    },
+    "money": {
+      "description": "Decimal amount with its own ISO 4217 currency, for amounts outside a pricing block.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "$ref": "#/$defs/amount" },
+        "currency": { "$ref": "#/$defs/currencyCode" }
+      }
+    },
+    "percentage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "positiveInteger": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+    },
+    "phone": {
+      "description": "Phone number, preferably in E.164 style; spaces, parentheses, slashes and hyphens are allowed.",
+      "type": "string",
+      "pattern": "^\\+?[0-9][0-9 ()/-]{3,30}$"
+    },
+    "language": {
+      "description": "Document language.",
+      "enum": ["de", "en"]
+    },
+    "documentType": {
+      "enum": ["rfi", "rfp", "msa", "sow", "change-request"]
+    },
+    "documentStatus": {
+      "description": "Lifecycle status. Only a human approver may set final (see #34).",
+      "enum": ["draft", "final"]
+    },
+    "priority": {
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "address": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["street", "postal_code", "city", "country"],
+      "properties": {
+        "street": { "$ref": "#/$defs/text" },
+        "postal_code": { "$ref": "#/$defs/text" },
+        "city": { "$ref": "#/$defs/text" },
+        "region": { "$ref": "#/$defs/text" },
+        "country": {
+          "description": "ISO 3166-1 alpha-2 country code, for example DE.",
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        }
+      }
+    },
+    "person": {
+      "description": "Person acting for the document, for example its author or approver.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "email": { "$ref": "#/$defs/email" }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "role": { "$ref": "#/$defs/text" },
+        "email": { "$ref": "#/$defs/email" },
+        "phone": { "$ref": "#/$defs/phone" }
+      }
+    },
+    "signatory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "title": { "$ref": "#/$defs/text" }
+      }
+    },
+    "party": {
+      "description": "Organisation that is a party to the document (supplier or customer).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "legal_form": { "$ref": "#/$defs/text" },
+        "address": { "$ref": "#/$defs/address" },
+        "registration_number": { "$ref": "#/$defs/text" },
+        "vat_id": {
+          "description": "VAT identification number with ISO country prefix, for example DE123456789.",
+          "type": "string",
+          "pattern": "^[A-Z]{2}[A-Za-z0-9+*.]{2,13}$"
+        },
+        "profile": {
+          "description": "Short description of the organisation, used in RFI and RFP.",
+          "$ref": "#/$defs/text"
+        },
+        "contact": { "$ref": "#/$defs/contact" },
+        "signatory": { "$ref": "#/$defs/signatory" }
+      }
+    },
+    "documentReference": {
+      "description": "Reference to a predecessor document by type and number, for example the MSA that governs a SOW (see #13).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "number"],
+      "properties": {
+        "type": { "$ref": "#/$defs/documentType" },
+        "number": { "$ref": "#/$defs/documentNumber" },
+        "version": { "$ref": "#/$defs/version" },
+        "date": { "$ref": "#/$defs/date" }
+      }
+    },
+    "governingDocument": {
+      "description": "Predecessor reference as rendered in template text (msa.* in SOW and CR, sow.* in CR). check_plausibility compares it with the matching document.references entry.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference"],
+      "properties": {
+        "reference": { "$ref": "#/$defs/documentNumber" },
+        "version": { "$ref": "#/$defs/version" },
+        "date": { "$ref": "#/$defs/date" }
+      }
+    },
+    "document": {
+      "description": "Document metadata. Each document schema pins type with const.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "number", "version", "date", "status", "language"],
+      "properties": {
+        "type": { "$ref": "#/$defs/documentType" },
+        "number": { "$ref": "#/$defs/documentNumber" },
+        "version": { "$ref": "#/$defs/version" },
+        "date": { "$ref": "#/$defs/date" },
+        "status": { "$ref": "#/$defs/documentStatus" },
+        "language": { "$ref": "#/$defs/language" },
+        "confidentiality": { "$ref": "#/$defs/text" },
+        "created_by": { "$ref": "#/$defs/person" },
+        "approved_by": { "$ref": "#/$defs/person" },
+        "approved_at": { "$ref": "#/$defs/date" },
+        "references": {
+          "description": "Predecessor documents: RFI for an RFP, MSA for a SOW, SOW and MSA for a change request.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/documentReference" }
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "summary": { "$ref": "#/$defs/text" },
+        "background": { "$ref": "#/$defs/text" },
+        "objectives": { "$ref": "#/$defs/textList", "minItems": 1 },
+        "start_date": { "$ref": "#/$defs/date" },
+        "end_date": { "$ref": "#/$defs/date" }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["in_scope"],
+      "properties": {
+        "in_scope": { "$ref": "#/$defs/textList", "minItems": 1 },
+        "out_of_scope": { "$ref": "#/$defs/textList" }
+      }
+    },
+    "deliverable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "name": { "$ref": "#/$defs/text" },
+        "description": { "$ref": "#/$defs/text" },
+        "acceptance_criteria": { "$ref": "#/$defs/text" },
+        "due_date": { "$ref": "#/$defs/date" }
+      }
+    },
+    "milestone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "date"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "date": { "$ref": "#/$defs/date" },
+        "deliverables": {
+          "description": "IDs of the deliverables completed by this milestone.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/identifier" }
+        }
+      }
+    },
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "description": { "$ref": "#/$defs/text" }
+      }
+    },
+    "role": {
+      "description": "Project role and its responsibilities (SOW roles table).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "party", "responsibilities"],
+      "properties": {
+        "role": { "$ref": "#/$defs/text" },
+        "party": { "enum": ["supplier", "customer"] },
+        "name": { "$ref": "#/$defs/text" },
+        "responsibilities": { "$ref": "#/$defs/text" }
+      }
+    },
+    "rateCardEntry": {
+      "description": "Daily rate for a role. Amounts are in pricing.currency; check_plausibility checks subtotal = daily_rate * days.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "daily_rate"],
+      "properties": {
+        "role": { "$ref": "#/$defs/text" },
+        "daily_rate": { "$ref": "#/$defs/amount" },
+        "days": { "type": "number", "minimum": 0 },
+        "subtotal": { "$ref": "#/$defs/amount" }
+      }
+    },
+    "paymentPlanEntry": {
+      "description": "Payment plan entry. The amount is in pricing.currency.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trigger", "amount"],
+      "properties": {
+        "trigger": { "$ref": "#/$defs/text" },
+        "amount": { "$ref": "#/$defs/amount" },
+        "date": { "$ref": "#/$defs/date" }
+      }
+    },
+    "pricingModel": {
+      "enum": ["fixed_price", "time_and_materials", "capped_tm"]
+    },
+    "pricing": {
+      "description": "Commercials. Every amount inside this object is a decimal number in pricing.currency (ISO 4217).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": { "$ref": "#/$defs/pricingModel" },
+        "currency": { "$ref": "#/$defs/currencyCode" },
+        "total": { "$ref": "#/$defs/amount" },
+        "cap": { "$ref": "#/$defs/amount" },
+        "rate_card": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/rateCardEntry" }
+        },
+        "payment_schedule": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/paymentPlanEntry" }
+        },
+        "expenses_policy": { "$ref": "#/$defs/text" },
+        "tax_note": { "$ref": "#/$defs/text" }
+      }
+    },
+    "legal": {
+      "description": "Legal framework terms, used by the MSA.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "governing_law": { "$ref": "#/$defs/text" },
+        "jurisdiction": { "$ref": "#/$defs/text" },
+        "liability_cap": {
+          "description": "Aggregate liability cap as amount and ISO 4217 currency.",
+          "$ref": "#/$defs/money"
+        },
+        "payment_terms_days": { "$ref": "#/$defs/positiveInteger" },
+        "notice_period_days": { "$ref": "#/$defs/positiveInteger" },
+        "term_years": {
+          "description": "Initial term in years.",
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "acceptance_days": {
+          "description": "Business days until deemed acceptance when a SOW has no acceptance procedure.",
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "ip_model": {
+          "description": "Selects the intellectual property clause variant. Free-text clauses are deliberately not accepted.",
+          "enum": ["licence", "assignment"]
+        },
+        "confidentiality_years": {
+          "description": "Years the confidentiality obligation survives termination.",
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "cure_period_days": {
+          "description": "Days to remedy a material breach after written notice.",
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "dpa_reference": {
+          "description": "Reference of the concluded data processing agreement (Art. 28 GDPR).",
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "assumption": { "$ref": "#/$defs/text" },
+    "assumptions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/assumption" }
+    },
+    "risk": {
+      "description": "Risk statement as rendered in a bullet list.",
+      "$ref": "#/$defs/text"
+    },
+    "risks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/risk" }
+    }
+  }
+}

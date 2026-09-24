@@ -1,0 +1,85 @@
+{
+  "$schema": "../../msa.schema.json",
+  "document": {
+    "type": "msa",
+    "number": "MSA-2026-001",
+    "version": "1.0",
+    "date": "2026-03-02",
+    "status": "final",
+    "language": "de",
+    "confidentiality": "Vertraulich",
+    "created_by": {
+      "name": "Erika Beispiel",
+      "email": "erika.beispiel@fabrikam.example"
+    },
+    "approved_by": {
+      "name": "Max Muster",
+      "email": "max.muster@fabrikam.example"
+    },
+    "approved_at": "2026-03-01",
+    "references": [
+      {
+        "type": "rfp",
+        "number": "RFP-2026-004",
+        "version": "1.0",
+        "date": "2026-02-02"
+      }
+    ]
+  },
+  "supplier": {
+    "name": "Fabrikam Consulting GmbH",
+    "legal_form": "Gesellschaft mit beschränkter Haftung",
+    "address": {
+      "street": "Beispielweg 1",
+      "postal_code": "10115",
+      "city": "Berlin",
+      "country": "DE"
+    },
+    "registration_number": "HRB 000001 B",
+    "vat_id": "DE000000001",
+    "contact": {
+      "name": "Erika Beispiel",
+      "role": "Account Manager",
+      "email": "erika.beispiel@fabrikam.example",
+      "phone": "+49 30 0000 0001"
+    },
+    "signatory": {
+      "name": "Max Muster",
+      "title": "Geschäftsführer"
+    }
+  },
+  "customer": {
+    "name": "Contoso Handel AG",
+    "legal_form": "Aktiengesellschaft",
+    "address": {
+      "street": "Musterstraße 5",
+      "postal_code": "80331",
+      "city": "München",
+      "region": "Bayern",
+      "country": "DE"
+    },
+    "registration_number": "HRB 000002",
+    "vat_id": "DE000000002",
+    "contact": {
+      "name": "Jana Probe",
+      "role": "Einkauf",
+      "email": "jana.probe@contoso.example"
+    },
+    "signatory": {
+      "name": "Paul Platzhalter",
+      "title": "Vorstand"
+    }
+  },
+  "legal": {
+    "governing_law": "the Federal Republic of Germany",
+    "jurisdiction": "Munich",
+    "payment_terms_days": 30,
+    "notice_period_days": 90,
+    "term_years": 3,
+    "acceptance_days": 10,
+    "ip_model": "licence",
+    "confidentiality_years": 5,
+    "cure_period_days": 30,
+    "dpa_reference": "AVV-2026-001"
+  }
+}

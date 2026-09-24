@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proposal-generator.example/agent/response-envelope.schema.json",
+  "title": "Proposal agent response",
+  "description": "Envelope for every proposal agent reply. The document is validated against schemas/<documentType>.schema.json when the status is awaiting_confirmation or complete.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "language", "message", "documentType", "questions", "missingFields", "document"],
+  "properties": {
+    "status": {
+      "description": "needs_input while mandatory data is missing, awaiting_confirmation while the summary waits for the user's confirmation, complete after confirmation.",
+      "enum": ["needs_input", "awaiting_confirmation", "complete"]
+    },
+    "language": {
+      "description": "Language of the reply.",
+      "enum": ["de", "en"]
+    },
+    "message": {
+      "description": "Text shown to the user.",
+      "type": "string",
+      "minLength": 1
+    },
+    "documentType": {
+      "description": "Selected document type, or null while it is unknown.",
+      "type": ["string", "null"]
+    },
+    "questions": {
+      "description": "Questions for the user in this reply; at most three.",
+      "type": "array",
+      "maxItems": 3,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "missingFields": {
+      "description": "JSON paths of mandatory fields that are still missing.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "document": {
+      "description": "Document data collected so far, or null.",
+      "type": ["object", "null"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "needs_input" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": { "questions": { "minItems": 1 } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "enum": ["awaiting_confirmation", "complete"] } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "documentType": { "type": "string" },
+          "document": { "type": "object" },
+          "missingFields": { "maxItems": 0 }
+        }
+      }
+    }
+  ]
+}

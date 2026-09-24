@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "check_plausibility parameters",
+  "description": "Arguments of the check_plausibility function tool.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["documentType", "document"],
+  "properties": {
+    "documentType": {
+      "description": "Document type of the document to check.",
+      "type": "string",
+      "enum": ["sow", "rfi", "rfp", "msa", "change-request"]
+    },
+    "document": {
+      "description": "Current document data, shaped like the schema of the document type.",
+      "type": "object"
+    }
+  }
+}
