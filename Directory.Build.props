@@ -1,0 +1,14 @@
+<Project>
+  <!--
+    Settings shared by every project under this directory.
+    Intentionally NOT set here: TargetFramework (each project declares net9.0 explicitly)
+    and central package management (projects keep explicit PackageReference versions).
+    Analyzers stay at the SDK default level.
+  -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
