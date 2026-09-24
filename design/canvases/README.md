@@ -12,6 +12,12 @@ design/canvases/
     assets/        # optional exports and images
 ```
 
+## Canvases
+
+| Canvas | Story | Enriches | Status |
+| ------ | ----- | -------- | ------ |
+| [001-proposal-wizard](001-proposal-wizard/canvas.md) | #31 | #32, #33, #34, #35, #36, #17 (epic #30) | Draft, revision 1 |
+
 ## Reopening a canvas
 
 1. Read `canvas.md` for intent, decisions, open questions, and the linked story.

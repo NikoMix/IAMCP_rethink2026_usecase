@@ -1,0 +1,1664 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Canvas-Mockup: Angebotsassistent (001-proposal-wizard)</title>
+    <meta name="canvas-id" content="001-proposal-wizard" />
+    <meta name="canvas-revision" content="1" />
+    <meta name="canvas-story" content="#31" />
+    <meta name="canvas-enriches" content="#32 #33 #34 #35 #36 #17" />
+    <meta name="canvas-epic" content="#30" />
+    <!--
+      Canvas 001-proposal-wizard, revision 1. Specification: canvas.md in this directory.
+      Self-contained: no external network dependencies. Opens from the repository in any current browser.
+      The canvas bar at the top is review chrome, not part of the product UI.
+      Deep links: mockup.html#<state-key>, for example mockup.html#validation. Default view: #core (the six core states of #31).
+      Enriches: #32, #33, #34, #35, #36 (and #17). Design issue: #31. Epic: #30.
+    -->
+    <style>
+      :root {
+        color-scheme: light;
+        /* Design tokens. Contrast ratios are recorded in canvas.md, section Accessibility. */
+        --surface: #ffffff;
+        --surface-muted: #f6f8fa;
+        --surface-sunken: #eef1f4;
+        --border: #d0d7de;
+        --border-control: #6e7781;
+        --text: #1f2328;
+        --text-muted: #59636e;
+        --accent: #0969da;
+        --accent-strong: #0550ae;
+        --on-accent: #ffffff;
+        --danger: #a40e26;
+        --danger-bg: #ffebe9;
+        --warning: #7d4e00;
+        --warning-bg: #fff8c5;
+        --info: #0550ae;
+        --info-bg: #ddf4ff;
+        --success: #116329;
+        --success-bg: #dafbe1;
+        --focus: #0969da;
+        --radius: 8px;
+        --space: 16px;
+        --header-h: 56px;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-padding-top: calc(var(--header-h) + 16px); }
+      body {
+        margin: 0;
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--surface-sunken);
+        color: var(--text);
+      }
+      a { color: var(--accent-strong); }
+      h1, h2, h3, h4, h5 { line-height: 1.25; }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+      }
+      :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+      button, input, select, textarea { font: inherit; color: inherit; }
+      button {
+        padding: 8px 14px; min-height: 40px; border-radius: 6px;
+        border: 1px solid var(--border-control); background: var(--surface); cursor: pointer;
+      }
+      button:hover { background: var(--surface-muted); }
+      button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+      button.primary:hover { background: var(--accent-strong); }
+      button.link { border: 0; background: none; padding: 0; min-height: 24px; color: var(--accent-strong); text-decoration: underline; }
+      button:disabled { cursor: not-allowed; background: var(--surface-muted); border-color: var(--border); color: var(--text-muted); }
+      input[type="text"], input[type="date"], select, textarea {
+        min-height: 40px; padding: 8px 10px; border: 1px solid var(--border-control);
+        border-radius: 6px; background: var(--surface); width: 100%;
+      }
+      [aria-invalid="true"] { border: 2px solid var(--danger) !important; }
+      label, .label { font-weight: 600; display: block; margin-bottom: 4px; }
+      .hint { color: var(--text-muted); font-size: 14px; margin: 4px 0 0; }
+      .field-error { color: var(--danger); font-size: 14px; font-weight: 600; margin: 4px 0 0; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+      /* Review chrome */
+      .canvas-bar {
+        display: flex; gap: 12px 16px; align-items: center; flex-wrap: wrap;
+        padding: 10px var(--space); background: #1f2328; color: #ffffff; font-size: 14px;
+      }
+      .canvas-bar strong { font-size: 14px; }
+      .canvas-bar label { display: inline; margin: 0; font-weight: 600; }
+      .canvas-bar select { width: auto; min-width: 320px; color: var(--text); }
+      .canvas-bar button { min-height: 36px; color: var(--text); }
+      .canvas-bar a { color: #ffffff; }
+      .state-caption {
+        display: none; margin: 0; padding: 8px var(--space); background: #1f2328; color: #ffffff;
+        font-size: 14px; font-weight: 600;
+      }
+      body.stacked .state-caption { display: block; }
+
+      /* App frame */
+      .frame {
+        max-width: 1440px; margin: var(--space) auto; background: var(--surface);
+        border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+      }
+      .skip-link { position: absolute; left: -9999px; top: 8px; z-index: 10; background: var(--surface); padding: 8px 12px; }
+      .skip-link:focus { left: 8px; }
+      header.app {
+        position: sticky; top: 0; z-index: 5; height: var(--header-h);
+        display: flex; align-items: center; gap: 24px; padding: 0 var(--space);
+        border-bottom: 1px solid var(--border); background: var(--surface);
+      }
+      .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; white-space: nowrap; }
+      .logo { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 6px; background: var(--accent-strong); color: #fff; font-size: 13px; }
+      header.app nav ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+      header.app nav a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 12px; border-radius: 6px; color: var(--text); text-decoration: none; }
+      header.app nav a:hover { background: var(--surface-muted); }
+      header.app nav a[aria-current="page"] { font-weight: 700; box-shadow: inset 0 -3px 0 var(--accent); }
+      .count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--accent-strong); color: #fff; font-size: 13px; font-weight: 700; }
+      .header-end { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+      .user { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+      .user-role { display: block; color: var(--text-muted); font-size: 13px; }
+      .avatar { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--surface-sunken); font-weight: 700; font-size: 13px; }
+
+      main { display: block; }
+      [hidden] { display: none !important; }
+      body.stacked main { display: flex; flex-direction: column; }
+      .state { display: none; position: relative; }
+      .state[data-active="true"] { display: block; }
+      body.stacked .state[data-active="true"] { border-top: 8px solid var(--surface-sunken); }
+      .page-pad { padding: 24px var(--space) 32px; }
+
+      /* Document bar and stepper */
+      .docbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px var(--space); border-bottom: 1px solid var(--border); background: var(--surface-muted); }
+      .docbar h1 { font-size: 20px; margin: 0; flex: 1 1 360px; min-width: 0; overflow-wrap: anywhere; }
+      .docbar .doctype { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+      .docbar .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px; }
+      .docbar .meta select { width: auto; min-height: 36px; padding: 4px 8px; }
+      .docbar .meta label { display: inline; margin-right: 6px; font-weight: 400; color: var(--text-muted); }
+      .badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; border: 1px solid; font-size: 14px; font-weight: 600; white-space: nowrap; }
+      .badge.draft { color: var(--text); background: var(--surface); border-color: var(--border-control); }
+      .badge.in_review { color: var(--warning); background: var(--warning-bg); border-color: var(--warning); }
+      .badge.final { color: var(--success); background: var(--success-bg); border-color: var(--success); }
+      .save { color: var(--text-muted); }
+      .save.failed { color: var(--danger); font-weight: 600; }
+      .stepper { display: flex; gap: 8px; list-style: none; margin: 0; padding: 10px var(--space); border-bottom: 1px solid var(--border); font-size: 14px; }
+      .stepper li { display: flex; align-items: center; gap: 8px; }
+      .stepper li + li::before { content: ""; width: 32px; height: 2px; background: var(--border-control); }
+      .stepper .num { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border-control); font-weight: 700; font-size: 13px; }
+      .stepper .done .num { background: var(--success); border-color: var(--success); color: #fff; }
+      .stepper [aria-current="step"] { font-weight: 700; }
+      .stepper [aria-current="step"] .num { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .stepper .upcoming { color: var(--text-muted); }
+      .stepper a { color: inherit; display: inline-flex; align-items: center; gap: 8px; min-height: 32px; }
+
+      /* Workspace */
+      .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 400px; min-height: 640px; }
+      .col-main { min-width: 0; padding: var(--space); background: var(--surface-sunken); }
+      .panel { border-left: 1px solid var(--border); padding: var(--space); background: var(--surface); display: grid; align-content: start; gap: 20px; }
+      .panel h2 { font-size: 18px; margin: 0 0 8px; }
+      .panel h3 { font-size: 15px; margin: 12px 0 4px; }
+      .panel section + section { border-top: 1px solid var(--border); padding-top: 16px; }
+      .toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+      .toolbar h2 { font-size: 18px; margin: 0; }
+      .toolbar .meta { color: var(--text-muted); font-size: 14px; margin: 0; }
+
+      /* Chat */
+      .chat { display: grid; grid-template-rows: 1fr auto; gap: 12px; max-width: 880px; margin: 0 auto; min-height: 600px; }
+      .chat-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; align-content: start; }
+      .msg { max-width: 88%; }
+      .msg.user { justify-self: end; }
+      .msg-head { display: flex; gap: 8px; align-items: baseline; font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+      .msg.user .msg-head { justify-content: flex-end; }
+      .msg-head .who { font-weight: 700; color: var(--text); }
+      .ai-tag { font-size: 12px; font-weight: 700; border: 1px solid var(--border-control); border-radius: 4px; padding: 0 5px; color: var(--text-muted); }
+      .bubble { padding: 12px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); overflow-wrap: anywhere; }
+      .msg.user .bubble { background: var(--info-bg); border-color: #b6e3ff; }
+      .bubble p { margin: 0 0 8px; }
+      .bubble p:last-child, .bubble ol:last-child, .bubble ul:last-child { margin-bottom: 0; }
+      .bubble ol, .bubble ul { margin: 4px 0 8px; padding-left: 22px; }
+      .caret { display: inline-block; width: 8px; height: 1em; background: var(--text); vertical-align: text-bottom; margin-left: 2px; animation: blink 1s steps(2) infinite; }
+      @keyframes blink { to { visibility: hidden; } }
+      .typing { font-size: 14px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
+      .separator { text-align: center; font-size: 13px; color: var(--text-muted); }
+      .choice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-top: 8px; }
+      .choice-grid button { text-align: left; min-height: 56px; }
+      .choice-grid button small { display: block; color: var(--text-muted); font-size: 13px; font-weight: 400; }
+      .composer { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; display: grid; gap: 8px; position: sticky; bottom: 0; }
+      .composer textarea { min-height: 72px; resize: vertical; }
+      .composer .row { justify-content: space-between; }
+      .inline-alert { margin-top: 8px; }
+      .bubble .findings, .bubble .counts { padding-left: 0; }
+
+      /* Alerts, notes, findings */
+      .alert { border: 1px solid; border-left-width: 6px; border-radius: 6px; padding: 12px 14px; background: var(--surface); }
+      .alert h2, .alert h3, .alert p { margin: 0 0 6px; font-size: 15px; }
+      .alert > :last-child { margin-bottom: 0; }
+      .alert.error { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); }
+      .alert.warning { border-color: var(--warning); background: var(--warning-bg); color: var(--warning); }
+      .alert.info { border-color: var(--info); background: var(--info-bg); color: var(--info); }
+      .alert.success { border-color: var(--success); background: var(--success-bg); color: var(--success); }
+      .alert.error a, .alert.error button.link { color: var(--danger); }
+      .alert ul { margin: 4px 0 0; padding-left: 20px; }
+      .counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; padding: 0; list-style: none; font-size: 14px; }
+      .counts li { padding: 2px 8px; border-radius: 999px; border: 1px solid; font-weight: 600; }
+      .findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      .finding { border: 1px solid; border-left-width: 6px; border-radius: 6px; padding: 8px 10px; font-size: 14px; }
+      .finding p { margin: 0 0 4px; color: var(--text); }
+      .finding .sev { font-weight: 700; display: inline-flex; gap: 6px; align-items: center; }
+      .finding .code { color: var(--text-muted); font-size: 13px; overflow-wrap: anywhere; }
+      .sev-error { border-color: var(--danger); background: var(--danger-bg); }
+      .sev-error .sev, .counts .c-error { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
+      .sev-warning { border-color: var(--warning); background: var(--warning-bg); }
+      .sev-warning .sev, .counts .c-warning { color: var(--warning); border-color: var(--warning); background: var(--warning-bg); }
+      .sev-info { border-color: var(--info); background: var(--info-bg); }
+      .sev-info .sev, .counts .c-info { color: var(--info); border-color: var(--info); background: var(--info-bg); }
+      .finding .sev { background: none !important; }
+
+      /* Required-field progress */
+      progress { width: 100%; height: 12px; accent-color: var(--success); }
+      .progress-text { font-weight: 700; margin: 0 0 4px; }
+      .fieldlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 14px; }
+      .fieldlist li { display: grid; grid-template-columns: 20px 1fr; gap: 6px; padding: 3px 0; }
+      .fieldlist .val { grid-column: 2; color: var(--text-muted); overflow-wrap: anywhere; }
+      .fieldlist .missing .val { color: var(--danger); font-weight: 600; }
+      .fieldlist .ico { font-weight: 700; }
+      .fieldlist .done .ico { color: var(--success); }
+      .fieldlist .missing .ico { color: var(--danger); }
+
+      /* Document preview */
+      .page {
+        position: relative; max-width: 820px; margin: 0 auto; padding: 48px 56px; background: #ffffff;
+        border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(31, 35, 40, .12); font-size: 15px; overflow: hidden;
+      }
+      .page > * { position: relative; }
+      .watermark {
+        position: absolute !important; inset: 0; display: grid; place-items: center; pointer-events: none;
+        font-size: 140px; font-weight: 800; color: rgba(31, 35, 40, .06); transform: rotate(-30deg); letter-spacing: .1em;
+      }
+      .ai-note { font-size: 13px; color: var(--text-muted); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; display: inline-block; margin: 0 0 16px; }
+      .doc-title { font-size: 26px; margin: 0 0 8px; }
+      .page h4 { font-size: 18px; margin: 24px 0 8px; }
+      .page h5 { font-size: 15px; margin: 16px 0 6px; }
+      .page table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+      .page th, .page td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; vertical-align: top; }
+      .page th { background: var(--surface-muted); }
+      .page td.num, .page th.num { text-align: right; }
+      .page tfoot td { font-weight: 700; }
+      .omitted { color: var(--text-muted); font-style: italic; font-size: 14px; border-top: 1px dashed var(--border); padding-top: 8px; }
+      .fv {
+        display: inline; min-height: 0; padding: 0 2px; border: 0; border-radius: 3px; background: none; font: inherit;
+        color: inherit; text-align: left; text-decoration: underline dashed var(--accent) 1px; text-underline-offset: 3px; cursor: pointer;
+      }
+      .fv:hover { background: var(--info-bg); }
+      .fv.has-error, .fv-ro.has-error { text-decoration: underline wavy var(--danger) 2px; background: var(--danger-bg); }
+      .fv.has-warning, .fv-ro.has-warning { text-decoration: underline wavy var(--warning) 2px; background: var(--warning-bg); }
+      .fv.has-error::before, .fv-ro.has-error::before { content: "✕ "; color: var(--danger); font-weight: 700; }
+      .fv.has-warning::before, .fv-ro.has-warning::before { content: "▲ "; color: var(--warning); }
+      .fv.selected { outline: 2px solid var(--accent); }
+      .fv.flash { background: var(--success-bg); transition: background .6s; }
+
+      /* Editor, approval, tables */
+      .editor { display: grid; gap: 12px; }
+      .editor .row button { flex: 1 1 auto; }
+      .amount { display: flex; align-items: center; gap: 8px; }
+      .amount input { text-align: right; }
+      .amount span { font-weight: 600; }
+      .checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+      .checklist li { display: grid; grid-template-columns: 20px 1fr; gap: 6px; }
+      .checklist .ok { color: var(--success); font-weight: 700; }
+      .checklist .warn { color: var(--warning); font-weight: 700; }
+      .checkbox { display: grid; grid-template-columns: 24px 1fr; gap: 8px; align-items: start; font-weight: 400; }
+      .checkbox input { width: 20px; height: 20px; margin: 2px 0 0; }
+      dl.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; font-size: 14px; }
+      dl.kv dt { color: var(--text-muted); }
+      dl.kv dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+      table.data { width: 100%; border-collapse: collapse; font-size: 14px; }
+      table.data th, table.data td { padding: 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+      table.data th { background: var(--surface-muted); white-space: nowrap; }
+      table.data th button { border: 0; background: none; padding: 0; min-height: 24px; font-weight: 700; }
+      .log-table td:first-child { font-weight: 600; }
+
+      /* Start page */
+      .start { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 32px; max-width: 1240px; margin: 0 auto; }
+      .start h1 { font-size: 28px; margin: 0 0 4px; }
+      .lead { color: var(--text-muted); margin: 0 0 24px; }
+      fieldset { border: 0; margin: 0 0 24px; padding: 0; min-width: 0; }
+      legend { font-weight: 700; font-size: 17px; margin-bottom: 8px; padding: 0; }
+      .type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+      .type-card { position: relative; display: block; margin: 0; padding: 14px; border: 1px solid var(--border-control); border-radius: var(--radius); font-weight: 400; cursor: pointer; min-height: 116px; }
+      .type-card input { position: absolute; top: 16px; right: 14px; width: 20px; height: 20px; margin: 0; }
+      .type-card .abbr { display: block; font-size: 20px; font-weight: 800; }
+      .type-card .name { display: block; font-weight: 600; }
+      .type-card .desc { display: block; font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+      .type-card:has(input:checked) { border: 2px solid var(--accent); background: var(--info-bg); padding: 13px; }
+      .type-card:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+      .lang-options { display: flex; gap: 12px; flex-wrap: wrap; }
+      .lang-options label { display: flex; gap: 8px; align-items: center; font-weight: 400; min-height: 40px; padding: 6px 12px; border: 1px solid var(--border-control); border-radius: 6px; }
+      .card { border: 1px solid var(--border); border-radius: var(--radius); padding: var(--space); background: var(--surface); }
+      .card h2 { font-size: 18px; margin: 0 0 8px; }
+      .empty { text-align: center; padding: 32px 16px; color: var(--text-muted); }
+      .empty .big { font-size: 40px; line-height: 1; color: var(--border-control); }
+      .empty h2 { color: var(--text); }
+
+      /* Skeleton */
+      .skeleton { background: linear-gradient(90deg, var(--surface-sunken), var(--surface-muted), var(--surface-sunken)); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+      @keyframes shimmer { to { background-position: -200% 0; } }
+      .sk-line { height: 14px; margin: 8px 0; }
+      .sk-block { height: 96px; margin: 12px 0; }
+      .spinner { width: 18px; height: 18px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; flex: none; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* Modal overlay (static depiction inside a state) and native dialogs */
+      .overlay { position: absolute; inset: 0; z-index: 4; background: rgba(31, 35, 40, .45); display: grid; place-items: start center; padding-top: 120px; }
+      .modal, dialog { width: min(560px, calc(100% - 32px)); border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 20px 24px; box-shadow: 0 8px 24px rgba(31, 35, 40, .25); color: var(--text); }
+      dialog::backdrop { background: rgba(31, 35, 40, .45); }
+      .modal h2, dialog h2 { margin: 0 0 12px; font-size: 20px; }
+      .modal .actions, dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+      .export-list { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 10px; }
+      .export-list li { display: grid; grid-template-columns: 24px 1fr; gap: 8px; align-items: start; padding: 10px; border: 1px solid var(--border); border-radius: 6px; }
+      .export-list .fname { font-family: ui-monospace, Consolas, monospace; font-size: 13px; overflow-wrap: anywhere; color: var(--text-muted); }
+      .export-list .ok { color: var(--success); font-weight: 700; }
+      .export-list .bad { color: var(--danger); font-weight: 700; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .skeleton, .spinner, .caret { animation: none; }
+        .fv.flash { transition: none; }
+      }
+      @media (max-width: 1200px) {
+        .workspace { grid-template-columns: minmax(0, 1fr) 340px; }
+        .page { padding: 32px; }
+      }
+      @media (max-width: 1024px) {
+        .workspace, .start { grid-template-columns: 1fr; }
+        .panel { border-left: 0; border-top: 1px solid var(--border); }
+        header.app { height: auto; flex-wrap: wrap; padding: 8px var(--space); position: static; }
+        .header-end { margin-left: 0; }
+        .stepper { flex-wrap: wrap; }
+        .msg { max-width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas-bar" role="region" aria-label="Canvas-Steuerung (nicht Teil der Anwendung)">
+      <strong>Canvas 001-proposal-wizard · Rev. 1</strong>
+      <label for="state-select">Zustand</label>
+      <select id="state-select">
+        <optgroup label="Übersichten">
+          <option value="core">#31 – alle sechs Kernzustände untereinander</option>
+          <option value="all">Alle Zustände untereinander</option>
+        </optgroup>
+        <optgroup label="#31 – Kernzustände">
+          <option value="start-empty">1 · Leer – Startseite ohne Entwürfe (#32)</option>
+          <option value="capture">2 · Erfassung – Chat mit Streaming (#32, #17)</option>
+          <option value="validation">3 · Validierungsfehler – Export blockiert (#33)</option>
+          <option value="preview">4 · Vorschau und Bearbeitung (#33)</option>
+          <option value="export">5 · Export läuft (#33, #28)</option>
+          <option value="error-agent">6 · Fehler – Agent nicht erreichbar (#32)</option>
+        </optgroup>
+        <optgroup label="Erfassung (#32, #17)">
+          <option value="capture-unclear">Dokumenttyp unklar – Auswahl anbieten</option>
+          <option value="summary">Zusammenfassung zur Bestätigung</option>
+        </optgroup>
+        <optgroup label="Vorschau, Sprache, Export (#33, #36, #28)">
+          <option value="preview-en">Vorschau – Dokumentsprache Englisch (#36)</option>
+          <option value="export-done">Export abgeschlossen</option>
+          <option value="error-export">Fehler – PDF-Erstellung fehlgeschlagen</option>
+        </optgroup>
+        <optgroup label="Freigabe (#34)">
+          <option value="review">Freigabe durch Approver</option>
+          <option value="denied">Keine Berechtigung</option>
+          <option value="final">Freigegeben – Status final</option>
+          <option value="reverted">Nach Änderung zurück auf „In Prüfung“</option>
+        </optgroup>
+        <optgroup label="Entwürfe (#35)">
+          <option value="loading">Laden – Entwurf wird fortgesetzt</option>
+          <option value="documents">Meine Dokumente</option>
+          <option value="documents-empty">Meine Dokumente – leer</option>
+          <option value="save-failed">Speichern fehlgeschlagen</option>
+        </optgroup>
+      </select>
+      <button type="button" id="replay">Animation neu starten</button>
+      <a href="./canvas.md">Spezifikation (canvas.md)</a>
+    </div>
+
+    <div class="frame">
+      <header class="app">
+        <a class="skip-link" href="#main">Zum Inhalt springen</a>
+        <div class="brand"><span class="logo" aria-hidden="true">AG</span> Angebotsgenerator</div>
+        <nav aria-label="Hauptnavigation">
+          <ul>
+            <li><a href="#start-empty" data-nav="new">Neues Dokument</a></li>
+            <li><a href="#documents" data-nav="docs">Meine Dokumente</a></li>
+            <li id="nav-approvals" hidden><a href="#review" data-nav="approvals">Freigaben <span class="count"><span aria-hidden="true">1</span><span class="sr-only">(1 offen)</span></span></a></li>
+          </ul>
+        </nav>
+        <div class="header-end">
+          <a href="#hilfe">Hilfe</a>
+          <div class="user">
+            <span class="avatar" aria-hidden="true" id="user-initials">LV</span>
+            <span><span id="user-name">Lena Vogt</span><span class="user-role" id="user-role">Account Manager</span></span>
+          </div>
+        </div>
+      </header>
+
+      <main id="main" tabindex="-1">
+        <!-- ============ Start page, empty (core state 1) ============ -->
+        <section class="state" data-state="start-empty" data-core="1" data-nav="new" aria-labelledby="h1-start-empty">
+          <p class="state-caption">Kernzustand 1 von 6 · Leer – Startseite ohne Entwürfe (#32, #36)</p>
+          <div class="page-pad">
+            <div class="start">
+              <form id="start-form" novalidate aria-describedby="start-lead">
+                <h1 id="h1-start-empty">Neues Dokument erstellen</h1>
+                <p class="lead" id="start-lead">Wählen Sie einen Dokumenttyp oder beschreiben Sie Ihr Vorhaben. Der Agent fragt nur nach den Angaben, die noch fehlen.</p>
+
+                <div id="start-error" class="alert error" role="alert" tabindex="-1" hidden>
+                  <p>Wählen Sie einen Dokumenttyp oder beschreiben Sie Ihr Vorhaben.</p>
+                </div>
+
+                <fieldset>
+                  <legend>Dokumenttyp <span class="hint">(optional)</span></legend>
+                  <div class="type-grid">
+                    <label class="type-card"><input type="radio" name="doctype" value="sow" /><span class="abbr">SOW</span><span class="name">Statement of Work</span><span class="desc">Umfang, Lieferergebnisse, Zeitplan und Preis eines Projekts</span></label>
+                    <label class="type-card"><input type="radio" name="doctype" value="rfi" /><span class="abbr">RFI</span><span class="name">Request for Information</span><span class="desc">Markt und Anbieter unverbindlich erkunden</span></label>
+                    <label class="type-card"><input type="radio" name="doctype" value="rfp" /><span class="abbr">RFP</span><span class="name">Request for Proposal</span><span class="desc">Verbindliche, vergleichbare Angebote anfordern</span></label>
+                    <label class="type-card"><input type="radio" name="doctype" value="msa" /><span class="abbr">MSA</span><span class="name">Master Service Agreement</span><span class="desc">Rahmenbedingungen für alle künftigen Aufträge</span></label>
+                    <label class="type-card"><input type="radio" name="doctype" value="change-request" /><span class="abbr">CR</span><span class="name">Change Request</span><span class="desc">Kontrollierte Änderung eines bestehenden SOW</span></label>
+                  </div>
+                </fieldset>
+
+                <div style="margin-bottom: 24px">
+                  <label for="intent">Ihr Vorhaben</label>
+                  <textarea id="intent" rows="4" aria-describedby="intent-hint"></textarea>
+                  <p class="hint" id="intent-hint">Beispiel: „Erstelle ein SOW für Fabrikam, Copilot-Rollout, Festpreis 48.000 EUR“. Geben Sie nur Daten ein, die für das Dokument nötig sind.</p>
+                </div>
+
+                <fieldset>
+                  <legend>Dokumentsprache</legend>
+                  <div class="lang-options">
+                    <label><input type="radio" name="doclang" value="de-DE" checked /> Deutsch (de-DE)</label>
+                    <label><input type="radio" name="doclang" value="en-US" /> <span lang="en">English (en-US)</span></label>
+                  </div>
+                  <p class="hint">Gilt für die festen Texte der Vorlage. Die Oberfläche bleibt deutsch. Sie können die Sprache später ändern.</p>
+                </fieldset>
+
+                <div class="row">
+                  <button class="primary" type="submit">Erstellung starten</button>
+                  <p class="hint" style="margin: 0">Antworten erzeugt ein KI-Agent. Prüfen Sie alle Inhalte vor der Verwendung.</p>
+                </div>
+              </form>
+
+              <aside class="card" aria-labelledby="h-recent">
+                <h2 id="h-recent">Zuletzt bearbeitet</h2>
+                <div class="empty">
+                  <div class="big" aria-hidden="true">▢</div>
+                  <h3>Noch keine Entwürfe</h3>
+                  <p>Entwürfe werden automatisch gespeichert und erscheinen hier und unter <a href="#documents">Meine Dokumente</a>.</p>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ Loading: resuming a draft (#35) ============ -->
+        <section class="state" data-state="loading" data-nav="docs" aria-labelledby="h1-loading" aria-busy="true">
+          <p class="state-caption">Laden – gespeicherter Entwurf wird fortgesetzt (#35)</p>
+          <div class="docbar">
+            <h1 id="h1-loading"><span class="doctype">Statement of Work</span>Fabrikam GmbH · Copilot-Rollout</h1>
+            <div class="meta"><span class="skeleton sk-line" style="width: 220px" aria-hidden="true"></span></div>
+          </div>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="chat">
+                <div>
+                  <p class="typing" role="status"><span class="spinner" aria-hidden="true"></span> Entwurf wird geladen: Angaben und Gesprächsverlauf …</p>
+                  <div aria-hidden="true">
+                    <div class="skeleton sk-block" style="width: 60%; margin-left: auto"></div>
+                    <div class="skeleton sk-block" style="width: 80%"></div>
+                    <div class="skeleton sk-block" style="width: 55%; margin-left: auto"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <aside class="panel" aria-label="Pflichtangaben (wird geladen)">
+              <div aria-hidden="true">
+                <div class="skeleton sk-line" style="width: 50%"></div>
+                <div class="skeleton sk-line"></div>
+                <div class="skeleton sk-line" style="width: 70%"></div>
+                <div class="skeleton sk-line" style="width: 80%"></div>
+                <div class="skeleton sk-line" style="width: 60%"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Capture: chat with streaming (core state 2) ============ -->
+        <section class="state" data-state="capture" data-core="2" aria-labelledby="h1-capture">
+          <p class="state-caption">Kernzustand 2 von 6 · Erfassung – Chat mit Streaming-Antwort und Fortschritt (#32, #17)</p>
+          <div class="docbar" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="true" data-save="Gespeichert um 10:41" data-h1="h1-capture"></div>
+          <ol class="stepper" data-step="1" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <section class="chat" aria-labelledby="chat-h-capture">
+                <h2 id="chat-h-capture" class="sr-only">Gespräch mit dem Agenten</h2>
+                <ol class="chat-log" aria-label="Gesprächsverlauf" id="log-capture">
+                  <li class="msg user"><div class="msg-head"><span class="who">Sie</span><time datetime="2026-09-24T10:38">10:38</time></div>
+                    <div class="bubble"><p>Erstelle ein SOW für Fabrikam, Copilot-Rollout, Festpreis 48.000 EUR</p></div></li>
+                  <li class="msg agent"><div class="msg-head"><span class="who">Agent</span><span class="ai-tag" title="KI-generiert">KI</span><time datetime="2026-09-24T10:38">10:38</time></div>
+                    <div class="bubble">
+                      <p>Ich erstelle ein <strong>Statement of Work (SOW)</strong>. Übernommen: Kunde „Fabrikam“, Projekt „Copilot-Rollout“, Preismodell Festpreis, 48.000,00 EUR.</p>
+                      <p>Dokumentnummer, Version, Datum und Ihr Unternehmen als Auftragnehmer habe ich vorbelegt. Es fehlen noch 6 Pflichtangaben. Zuerst drei Fragen:</p>
+                      <ol>
+                        <li>Unter welchem Rahmenvertrag (MSA) wird das Projekt beauftragt? Bitte nennen Sie die Referenz.</li>
+                        <li>Beschreiben Sie das Vorhaben in zwei bis drei Sätzen: Ausgangslage und Ziel.</li>
+                        <li>Welche Leistungen gehören zum Umfang?</li>
+                      </ol>
+                    </div></li>
+                  <li class="msg user"><div class="msg-head"><span class="who">Sie</span><time datetime="2026-09-24T10:41">10:41</time></div>
+                    <div class="bubble"><p>MSA-2025-014. Fabrikam führt Microsoft 365 Copilot für 400 Beschäftigte in Vertrieb und Kundenservice ein; Ziel ist eine produktive, sichere Nutzung innerhalb von drei Monaten. Umfang: Readiness-Check, Pilot mit 40 Nutzern, Rollout in drei Wellen, Schulungen.</p></div></li>
+                  <li class="msg agent"><div class="msg-head"><span class="who">Agent</span><span class="ai-tag" title="KI-generiert">KI</span><time datetime="2026-09-24T10:41">10:41</time></div>
+                    <div class="bubble" id="stream-capture" aria-busy="true"></div>
+                    <p class="typing" id="typing-capture"><span class="spinner" aria-hidden="true"></span> Der Agent schreibt …</p></li>
+                </ol>
+                <form class="composer" id="composer-capture" data-log="log-capture">
+                  <label for="msg-capture">Nachricht an den Agenten</label>
+                  <textarea id="msg-capture" rows="3" aria-describedby="msg-capture-hint send-reason-capture"></textarea>
+                  <p class="hint" id="msg-capture-hint">Eingabetaste sendet, Umschalt + Eingabetaste fügt eine neue Zeile ein.</p>
+                  <div class="row">
+                    <p class="hint" id="send-reason-capture" style="margin: 0">Senden ist möglich, sobald der Agent fertig geantwortet hat.</p>
+                    <div class="row">
+                      <button type="button" id="stop-capture">Antwort stoppen</button>
+                      <button type="submit" class="primary" id="send-capture" disabled>Senden</button>
+                    </div>
+                  </div>
+                </form>
+              </section>
+            </div>
+            <aside class="panel" aria-labelledby="req-h-capture">
+              <section>
+                <h2 id="req-h-capture">Pflichtangaben</h2>
+                <p class="progress-text" id="req-t-capture">12 von 15 Pflichtangaben</p>
+                <progress max="15" value="12" aria-labelledby="req-t-capture"></progress>
+                <h3>Dokument</h3>
+                <ul class="fieldlist">
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>SOW-Nr.<span class="val">SOW-2026-031 (vorbelegt)</span></li>
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Version<span class="val">1.0 (vorbelegt)</span></li>
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Datum<span class="val">24.09.2026 (vorbelegt)</span></li>
+                </ul>
+                <h3>Parteien und Rahmenvertrag</h3>
+                <ul class="fieldlist">
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Auftragnehmer<span class="val">Contoso Consulting GmbH (aus Ihrem Profil)</span></li>
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Auftraggeber<span class="val">Fabrikam</span></li>
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Rahmenvertrag (MSA-Referenz)<span class="val">MSA-2025-014</span></li>
+                </ul>
+                <h3>Projekt</h3>
+                <ul class="fieldlist">
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Projektname<span class="val">Copilot-Rollout</span></li>
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Projektbeschreibung<span class="val">Fabrikam führt Microsoft 365 Copilot für 400 Beschäftigte …</span></li>
+                  <li class="missing"><span class="ico" aria-hidden="true">○</span>Projektziele<span class="val">fehlt</span></li>
+                </ul>
+                <h3>Leistung und Zeitplan</h3>
+                <ul class="fieldlist">
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Leistungsumfang<span class="val">4 Punkte</span></li>
+                  <li class="missing"><span class="ico" aria-hidden="true">○</span>Lieferergebnisse<span class="val">fehlt</span></li>
+                  <li class="missing"><span class="ico" aria-hidden="true">○</span>Meilensteine<span class="val">fehlt</span></li>
+                </ul>
+                <h3>Vergütung</h3>
+                <ul class="fieldlist">
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Preismodell<span class="val">Festpreis</span></li>
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Währung<span class="val">EUR</span></li>
+                  <li class="done"><span class="ico" aria-hidden="true">✓</span>Gesamtpreis<span class="val">48.000,00 EUR</span></li>
+                </ul>
+              </section>
+              <section aria-labelledby="next-h-capture">
+                <h2 id="next-h-capture">Nächster Schritt</h2>
+                <p class="hint" id="next-hint-capture">Die Vorschau ist verfügbar, sobald alle Pflichtangaben erfasst sind und Sie die Zusammenfassung bestätigt haben.</p>
+                <button type="button" disabled aria-describedby="next-hint-capture">Zur Vorschau</button>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Capture: document type unclear (#17) ============ -->
+        <section class="state" data-state="capture-unclear" aria-labelledby="h1-capture-unclear">
+          <p class="state-caption">Erfassung – Dokumenttyp unklar, der Agent bietet die fünf Typen an (#17)</p>
+          <div class="docbar" data-type="Dokumenttyp noch offen" data-title="Neues Dokument" data-status="draft" data-version="–" data-lang="de" data-lang-editable="true" data-save="Gespeichert um 09:12" data-h1="h1-capture-unclear"></div>
+          <ol class="stepper" data-step="1" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <section class="chat" aria-labelledby="chat-h-unclear">
+                <h2 id="chat-h-unclear" class="sr-only">Gespräch mit dem Agenten</h2>
+                <ol class="chat-log" aria-label="Gesprächsverlauf">
+                  <li class="msg user"><div class="msg-head"><span class="who">Sie</span><time datetime="2026-09-24T09:12">09:12</time></div>
+                    <div class="bubble"><p>Ich brauche etwas für die Ausschreibung bei Northwind Traders zur neuen Datenplattform.</p></div></li>
+                  <li class="msg agent"><div class="msg-head"><span class="who">Agent</span><span class="ai-tag" title="KI-generiert">KI</span><time datetime="2026-09-24T09:12">09:12</time></div>
+                    <div class="bubble">
+                      <p>Gern. Aus Ihrer Nachricht kann ich den Dokumenttyp nicht sicher ableiten. Was möchten Sie erstellen?</p>
+                      <div class="choice-grid" role="group" aria-label="Dokumenttyp wählen">
+                        <button type="button"><strong>RFI</strong> – Request for Information<small>Markt und Anbieter unverbindlich erkunden</small></button>
+                        <button type="button"><strong>RFP</strong> – Request for Proposal<small>Verbindliche, vergleichbare Angebote anfordern</small></button>
+                        <button type="button"><strong>SOW</strong> – Statement of Work<small>Umfang, Lieferergebnisse, Zeitplan und Preis</small></button>
+                        <button type="button"><strong>MSA</strong> – Master Service Agreement<small>Rahmenbedingungen für künftige Aufträge</small></button>
+                        <button type="button"><strong>CR</strong> – Change Request<small>Änderung eines bestehenden SOW</small></button>
+                      </div>
+                      <p style="margin-top: 8px">Sie können auch einfach antworten, zum Beispiel „Wir wollen Angebote von drei Anbietern einholen“.</p>
+                    </div></li>
+                </ol>
+                <form class="composer">
+                  <label for="msg-unclear">Nachricht an den Agenten</label>
+                  <textarea id="msg-unclear" rows="3" aria-describedby="msg-unclear-hint"></textarea>
+                  <div class="row">
+                    <p class="hint" id="msg-unclear-hint" style="margin: 0">Eingabetaste sendet, Umschalt + Eingabetaste fügt eine neue Zeile ein.</p>
+                    <button type="submit" class="primary">Senden</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+            <aside class="panel" aria-labelledby="req-h-unclear">
+              <section>
+                <h2 id="req-h-unclear">Pflichtangaben</h2>
+                <p>Noch kein Dokumenttyp festgelegt.</p>
+                <p class="hint">Sobald der Typ feststeht, sehen Sie hier, welche Pflichtangaben erfasst sind und welche fehlen.</p>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Summary for confirmation (#17, #20) ============ -->
+        <section class="state" data-state="summary" aria-labelledby="h1-summary">
+          <p class="state-caption">Erfassung – Korrektur eines Einzelwerts und Zusammenfassung zur Bestätigung mit Prüfergebnissen (#17, #20)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="true" data-save="Gespeichert um 10:58" data-h1="h1-summary"></div>
+          <ol class="stepper" data-step="1" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <section class="chat" aria-labelledby="chat-h-summary">
+                <h2 id="chat-h-summary" class="sr-only">Gespräch mit dem Agenten</h2>
+                <ol class="chat-log" aria-label="Gesprächsverlauf">
+                  <li class="separator">6 frühere Nachrichten · <button type="button" class="link">anzeigen</button></li>
+                  <li class="msg user"><div class="msg-head"><span class="who">Sie</span><time datetime="2026-09-24T10:57">10:57</time></div>
+                    <div class="bubble"><p>Der Kunde heißt korrekt Fabrikam GmbH.</p></div></li>
+                  <li class="msg agent"><div class="msg-head"><span class="who">Agent</span><span class="ai-tag" title="KI-generiert">KI</span><time datetime="2026-09-24T10:57">10:57</time></div>
+                    <div class="bubble">
+                      <p>Aktualisiert: Auftraggeber „Fabrikam“ → „Fabrikam GmbH“. Alle anderen Angaben bleiben unverändert.</p>
+                      <div class="card" role="group" aria-labelledby="sum-h">
+                        <h3 id="sum-h" style="margin-top: 0">Zusammenfassung – bitte prüfen und bestätigen</h3>
+                        <dl class="kv">
+                          <dt>Dokumenttyp</dt><dd>Statement of Work (SOW)</dd>
+                          <dt>SOW-Nr. · Version · Datum</dt><dd>SOW-2026-031 · 1.0 · 24.09.2026</dd>
+                          <dt>Dokumentsprache</dt><dd>Deutsch (de-DE)</dd>
+                          <dt>Auftragnehmer</dt><dd>Contoso Consulting GmbH</dd>
+                          <dt>Auftraggeber</dt><dd>Fabrikam GmbH <span class="badge draft">geändert</span></dd>
+                          <dt>Rahmenvertrag</dt><dd>MSA-2025-014 vom 15.03.2025</dd>
+                          <dt>Projekt</dt><dd>Copilot-Rollout, 02.11.2026 – 29.01.2027</dd>
+                          <dt>Ziele</dt><dd>3 Ziele</dd>
+                          <dt>Leistungsumfang</dt><dd>4 Leistungen, 2 Ausschlüsse</dd>
+                          <dt>Lieferergebnisse</dt><dd>D1 – D3</dd>
+                          <dt>Meilensteine</dt><dd>M1 – M4</dd>
+                          <dt>Vergütung</dt><dd>Festpreis 48.000,00 EUR, Zahlungsplan in 3 Raten</dd>
+                        </dl>
+                        <h4 style="margin: 16px 0 8px">Ergebnis der Plausibilitätsprüfung</h4>
+                        <div class="findings-host" data-model="summary"></div>
+                        <div class="row" style="margin-top: 12px">
+                          <button type="button" class="primary" data-goto="preview">Bestätigen und Vorschau erstellen</button>
+                          <button type="button" data-focus="msg-summary">Etwas korrigieren</button>
+                        </div>
+                      </div>
+                    </div></li>
+                </ol>
+                <form class="composer">
+                  <label for="msg-summary">Nachricht an den Agenten</label>
+                  <textarea id="msg-summary" rows="3" aria-describedby="msg-summary-hint"></textarea>
+                  <div class="row">
+                    <p class="hint" id="msg-summary-hint" style="margin: 0">Nennen Sie den Wert, den Sie ändern möchten. Nur dieser Wert wird aktualisiert.</p>
+                    <button type="submit" class="primary">Senden</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+            <aside class="panel" aria-labelledby="req-h-summary">
+              <section>
+                <h2 id="req-h-summary">Pflichtangaben</h2>
+                <p class="progress-text" id="req-t-summary">15 von 15 Pflichtangaben</p>
+                <progress max="15" value="15" aria-labelledby="req-t-summary"></progress>
+                <p class="hint">Alle Pflichtangaben sind erfasst. Optionale Angaben wie Rollen und Annahmen können Sie jederzeit im Chat ergänzen.</p>
+              </section>
+              <section aria-labelledby="next-h-summary">
+                <h2 id="next-h-summary">Nächster Schritt</h2>
+                <p class="hint">Bestätigen Sie die Zusammenfassung im Chat, um die Vorschau zu erstellen.</p>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Error: agent unreachable (core state 6) ============ -->
+        <section class="state" data-state="error-agent" data-core="6" aria-labelledby="h1-error-agent">
+          <p class="state-caption">Kernzustand 6 von 6 · Fehler – Agent nicht erreichbar, Nachricht bleibt erhalten (#32)</p>
+          <div class="docbar" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="true" data-save="Gespeichert um 10:41" data-h1="h1-error-agent"></div>
+          <ol class="stepper" data-step="1" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <section class="chat" aria-labelledby="chat-h-error">
+                <h2 id="chat-h-error" class="sr-only">Gespräch mit dem Agenten</h2>
+                <ol class="chat-log" aria-label="Gesprächsverlauf">
+                  <li class="separator">2 frühere Nachrichten · <button type="button" class="link">anzeigen</button></li>
+                  <li class="msg user"><div class="msg-head"><span class="who">Sie</span><time datetime="2026-09-24T10:41">10:41</time><span>· nicht gesendet</span></div>
+                    <div class="bubble"><p>MSA-2025-014. Fabrikam führt Microsoft 365 Copilot für 400 Beschäftigte in Vertrieb und Kundenservice ein; Ziel ist eine produktive, sichere Nutzung innerhalb von drei Monaten. Umfang: Readiness-Check, Pilot mit 40 Nutzern, Rollout in drei Wellen, Schulungen.</p></div>
+                    <div class="alert error inline-alert" role="alert">
+                      <p><strong>Nachricht nicht gesendet.</strong> Der Agent ist gerade nicht erreichbar.</p>
+                      <p>Ihre Nachricht und alle bisherigen Angaben sind gespeichert.</p>
+                      <div class="row"><button type="button" class="primary" data-goto="capture">Erneut senden</button><button type="button" data-focus="msg-error">Nachricht bearbeiten</button></div>
+                      <p class="hint" style="color: var(--danger)">Referenz für den Support: 7c1e-4a2b</p>
+                    </div></li>
+                </ol>
+                <form class="composer">
+                  <label for="msg-error">Nachricht an den Agenten</label>
+                  <textarea id="msg-error" rows="3" aria-describedby="msg-error-hint"></textarea>
+                  <div class="row">
+                    <p class="hint" id="msg-error-hint" style="margin: 0">Eingabetaste sendet, Umschalt + Eingabetaste fügt eine neue Zeile ein.</p>
+                    <button type="submit" class="primary">Senden</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+            <aside class="panel" aria-labelledby="req-h-error">
+              <section>
+                <h2 id="req-h-error">Pflichtangaben</h2>
+                <p class="progress-text" id="req-t-error">9 von 15 Pflichtangaben</p>
+                <progress max="15" value="9" aria-labelledby="req-t-error"></progress>
+                <p class="hint">Fehlend: Rahmenvertrag, Projektbeschreibung, Projektziele, Leistungsumfang, Lieferergebnisse, Meilensteine.</p>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Validation: export blocked by plausibility errors (core state 3) ============ -->
+        <section class="state" data-state="validation" data-core="3" aria-labelledby="h1-validation">
+          <p class="state-caption">Kernzustand 3 von 6 · Validierung – Prüfung meldet Fehler, Export gesperrt (#33, #20)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="true" data-save="Gespeichert um 11:07" data-h1="h1-validation"></div>
+          <ol class="stepper" data-step="2" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="alert error" role="alert" tabindex="-1" id="err-summary-validation" style="margin-bottom: 16px">
+                <h2 data-err-heading>Export nicht möglich: 2 Fehler gefunden</h2>
+                <p>Die Plausibilitätsprüfung hat Angaben gefunden, die sich widersprechen. Korrigieren Sie die Fehler; Warnungen blockieren den Export nicht.</p>
+                <ul class="error-links" data-model="validation"></ul>
+              </div>
+              <div class="toolbar">
+                <h2 id="pv-h-validation">Vorschau</h2>
+                <p class="meta">Klicken Sie auf einen unterstrichenen Wert, um ihn zu bearbeiten.</p>
+              </div>
+              <div class="doc-host" data-doc="de" data-model="validation" data-watermark="ENTWURF" aria-labelledby="pv-h-validation"></div>
+            </div>
+            <aside class="panel" aria-label="Bearbeiten und Prüfen">
+              <section class="editor-host" data-model="validation" data-select="project.end_date"></section>
+              <section aria-labelledby="f-h-validation">
+                <h2 id="f-h-validation">Prüfergebnisse</h2>
+                <div class="findings-host" data-model="validation"></div>
+              </section>
+              <section aria-labelledby="x-h-validation">
+                <h2 id="x-h-validation">Export</h2>
+                <p class="hint" id="x-reason-validation" data-gate-reason>Export gesperrt: Beheben Sie zuerst 2 Fehler.</p>
+                <div class="row">
+                  <button type="button" class="primary" disabled aria-describedby="x-reason-validation" data-gate data-goto="export">Exportieren (DOCX und PDF)</button>
+                  <button type="button" disabled aria-describedby="x-reason-validation" data-gate data-goto="review">Zur Freigabe senden</button>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Preview and edit (core state 4) ============ -->
+        <section class="state" data-state="preview" data-core="4" aria-labelledby="h1-preview">
+          <p class="state-caption">Kernzustand 4 von 6 · Vorschau – Werte direkt bearbeiten, Prüfung ohne Fehler (#33, #29, #40)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="true" data-save="Gespeichert um 11:12" data-h1="h1-preview"></div>
+          <ol class="stepper" data-step="2" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="toolbar">
+                <h2 id="pv-h-preview">Vorschau</h2>
+                <p class="meta">Klicken Sie auf einen unterstrichenen Wert, um ihn zu bearbeiten. Änderungen werden sofort geprüft und gespeichert.</p>
+              </div>
+              <div class="doc-host" data-doc="de" data-model="preview" data-watermark="ENTWURF" aria-labelledby="pv-h-preview"></div>
+            </div>
+            <aside class="panel" aria-label="Bearbeiten und Prüfen">
+              <section class="editor-host" data-model="preview"></section>
+              <section aria-labelledby="f-h-preview">
+                <h2 id="f-h-preview">Prüfergebnisse</h2>
+                <div class="findings-host" data-model="preview"></div>
+              </section>
+              <section aria-labelledby="x-h-preview">
+                <h2 id="x-h-preview">Nächste Schritte</h2>
+                <p class="hint" id="x-hint-preview">Exporte im Status „Entwurf“ tragen das Wasserzeichen ENTWURF. Für ein finales Dokument senden Sie den Entwurf zur Freigabe.</p>
+                <div class="row">
+                  <button type="button" class="primary" data-goto="export" aria-describedby="x-hint-preview">Exportieren (DOCX und PDF)</button>
+                  <button type="button" data-goto="review">Zur Freigabe senden</button>
+                </div>
+                <p class="hint"><button type="button" class="link" data-goto="capture">Zurück zum Chat</button> – Angaben im Gespräch ergänzen</p>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Preview in English (#36) ============ -->
+        <section class="state" data-state="preview-en" aria-labelledby="h1-preview-en">
+          <p class="state-caption">Vorschau – Dokumentsprache Englisch, Oberfläche bleibt deutsch (#36)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="draft" data-version="1.0" data-lang="en" data-lang-editable="true" data-save="Gespeichert um 11:14" data-h1="h1-preview-en"></div>
+          <ol class="stepper" data-step="2" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="alert info" role="status" style="margin-bottom: 16px">
+                <p><strong>Dokumentsprache auf Englisch (en-US) umgestellt.</strong> Überschriften, Standardtexte, Datums- und Zahlenformate kommen aus der englischen Vorlage. Ihre eigenen Angaben werden nicht übersetzt.</p>
+                <p>1 Angabe ist auf Deutsch formuliert: <button type="button" class="link" data-select="project.summary">Projektbeschreibung</button>. Passen Sie sie bei Bedarf an.</p>
+              </div>
+              <div class="toolbar">
+                <h2 id="pv-h-en">Vorschau</h2>
+                <p class="meta">Dokumentsprache: <span lang="en">English (en-US)</span></p>
+              </div>
+              <div class="doc-host" data-doc="en" data-model="preview" data-watermark="DRAFT" aria-labelledby="pv-h-en" lang="en"></div>
+            </div>
+            <aside class="panel" aria-label="Bearbeiten und Prüfen">
+              <section class="editor-host" data-model="preview"></section>
+              <section aria-labelledby="f-h-en">
+                <h2 id="f-h-en">Prüfergebnisse</h2>
+                <div class="findings-host" data-model="preview"></div>
+              </section>
+              <section aria-labelledby="x-h-en">
+                <h2 id="x-h-en">Nächste Schritte</h2>
+                <div class="row">
+                  <button type="button" class="primary" data-goto="export">Exportieren (DOCX und PDF)</button>
+                  <button type="button" data-goto="review">Zur Freigabe senden</button>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Export in progress (core state 5) ============ -->
+        <section class="state" data-state="export" data-core="5" aria-labelledby="h1-export">
+          <p class="state-caption">Kernzustand 5 von 6 · Export – DOCX und PDF werden aus demselben Datenstand erzeugt (#33, #28)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="false" data-save="Gespeichert um 11:12" data-h1="h1-export"></div>
+          <ol class="stepper" data-step="2" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace" inert>
+            <div class="col-main"><div class="doc-host" data-doc="de" data-model="preview" data-watermark="ENTWURF" aria-label="Vorschau"></div></div>
+            <aside class="panel"><section class="findings-host" data-model="preview"></section></aside>
+          </div>
+          <div class="overlay">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dlg-h-export" aria-describedby="dlg-d-export">
+              <h2 id="dlg-h-export">Dokument wird exportiert</h2>
+              <p id="dlg-d-export">Beide Dateien entstehen aus Datenstand Version 1.0 vom 24.09.2026, 11:12 Uhr. Das dauert meist unter 30 Sekunden.</p>
+              <ul class="export-list" aria-label="Exportformate">
+                <li><span class="ok" aria-hidden="true">✓</span><div><strong>Word (DOCX)</strong> – fertig<div class="fname">SOW_Fabrikam-GmbH_SOW-2026-031_v1.0.docx</div></div></li>
+                <li><span class="spinner" aria-hidden="true"></span><div><strong>PDF</strong> – wird erzeugt …<div class="fname">SOW_Fabrikam-GmbH_SOW-2026-031_v1.0.pdf</div></div></li>
+              </ul>
+              <p role="status" class="hint">Word-Dokument erstellt. PDF wird erzeugt.</p>
+              <p class="hint">Status „Entwurf“: beide Dateien tragen das Wasserzeichen ENTWURF.</p>
+              <div class="actions">
+                <button type="button">Abbrechen</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ Export finished ============ -->
+        <section class="state" data-state="export-done" aria-labelledby="h1-export-done">
+          <p class="state-caption">Export – abgeschlossen, Dateien zum Herunterladen (#33, #28)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="false" data-save="Gespeichert um 11:12" data-h1="h1-export-done"></div>
+          <ol class="stepper" data-step="2" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace" inert>
+            <div class="col-main"><div class="doc-host" data-doc="de" data-model="preview" data-watermark="ENTWURF" aria-label="Vorschau"></div></div>
+            <aside class="panel"><section class="findings-host" data-model="preview"></section></aside>
+          </div>
+          <div class="overlay">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dlg-h-done">
+              <h2 id="dlg-h-done" tabindex="-1">Export abgeschlossen</h2>
+              <p role="status">2 Dateien sind bereit. Beide beruhen auf Datenstand Version 1.0.</p>
+              <ul class="export-list" aria-label="Exportierte Dateien">
+                <li><span class="ok" aria-hidden="true">✓</span><div><strong>Word (DOCX)</strong> · 84 KB<div class="fname">SOW_Fabrikam-GmbH_SOW-2026-031_v1.0.docx</div><div class="row" style="margin-top: 6px"><button type="button">Word-Datei herunterladen</button></div></div></li>
+                <li><span class="ok" aria-hidden="true">✓</span><div><strong>PDF</strong> · 212 KB<div class="fname">SOW_Fabrikam-GmbH_SOW-2026-031_v1.0.pdf</div><div class="row" style="margin-top: 6px"><button type="button">PDF herunterladen</button></div></div></li>
+              </ul>
+              <p class="hint">Wasserzeichen ENTWURF, da das Dokument noch nicht freigegeben ist. Downloads stehen 24 Stunden bereit; danach exportieren Sie erneut.</p>
+              <div class="actions">
+                <button type="button" data-goto="review">Zur Freigabe senden</button>
+                <button type="button" class="primary" data-goto="preview">Schließen</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ Export failed ============ -->
+        <section class="state" data-state="error-export" aria-labelledby="h1-error-export">
+          <p class="state-caption">Fehler – PDF-Erzeugung fehlgeschlagen, kein Teilergebnis wird ausgeliefert (#33, #28)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="false" data-save="Gespeichert um 11:12" data-h1="h1-error-export"></div>
+          <ol class="stepper" data-step="2" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace" inert>
+            <div class="col-main"><div class="doc-host" data-doc="de" data-model="preview" data-watermark="ENTWURF" aria-label="Vorschau"></div></div>
+            <aside class="panel"><section class="findings-host" data-model="preview"></section></aside>
+          </div>
+          <div class="overlay">
+            <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="dlg-h-xerr" aria-describedby="dlg-d-xerr">
+              <h2 id="dlg-h-xerr">Export fehlgeschlagen</h2>
+              <div class="alert error" id="dlg-d-xerr">
+                <p>Das PDF konnte nicht erzeugt werden. Damit Word und PDF denselben Stand zeigen, stellen wir keine der beiden Dateien bereit.</p>
+                <p>Ihre Angaben sind unverändert gespeichert.</p>
+              </div>
+              <ul class="export-list" aria-label="Exportformate">
+                <li><span class="ok" aria-hidden="true">✓</span><div><strong>Word (DOCX)</strong> – erzeugt, zurückgehalten</div></li>
+                <li><span class="bad" aria-hidden="true">✕</span><div><strong>PDF</strong> – Zeitüberschreitung bei der Umwandlung</div></li>
+              </ul>
+              <p class="hint">Referenz für den Support: 3f9a-11d0</p>
+              <div class="actions">
+                <button type="button" data-goto="preview">Schließen</button>
+                <button type="button" class="primary" data-goto="export">Erneut versuchen</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ Approval by approver (#34, #29) ============ -->
+        <section class="state" data-state="review" data-role="approver" aria-labelledby="h1-review">
+          <p class="state-caption">Freigabe – Freigebende Person prüft und setzt den Status „Final“ (#34, #29)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="in_review" data-version="1.0" data-lang="de" data-lang-editable="false" data-save="Eingereicht am 24.09.2026, 11:15 von Lena Vogt" data-h1="h1-review"></div>
+          <ol class="stepper" data-step="3" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="toolbar">
+                <h2 id="pv-h-review">Zu prüfendes Dokument</h2>
+                <p class="meta">Nur lesen. Änderungen nimmt die erstellende Person vor.</p>
+              </div>
+              <div class="doc-host" data-doc="de" data-model="preview" data-watermark="ENTWURF" data-readonly="true" aria-labelledby="pv-h-review"></div>
+            </div>
+            <aside class="panel" aria-labelledby="ap-h-review">
+              <section>
+                <h2 id="ap-h-review">Freigabe</h2>
+                <dl class="kv" style="margin-bottom: 12px">
+                  <dt>Eingereicht von</dt><dd>Lena Vogt</dd>
+                  <dt>Version</dt><dd>1.0 · Datenstand 24.09.2026, 11:12</dd>
+                </dl>
+                <h3>Voraussetzungen</h3>
+                <ul class="checklist" aria-label="Voraussetzungen für die Freigabe">
+                  <li><span class="ok" aria-hidden="true">✓</span><span><span class="sr-only">Erfüllt: </span>15 von 15 Pflichtangaben erfasst</span></li>
+                  <li><span class="ok" aria-hidden="true">✓</span><span><span class="sr-only">Erfüllt: </span>Keine Fehler aus der Plausibilitätsprüfung</span></li>
+                  <li><span class="ok" aria-hidden="true">✓</span><span><span class="sr-only">Erfüllt: </span>Keine offenen Hinweise [GUIDANCE] in der Vorlage</span></li>
+                  <li><span class="warn" aria-hidden="true">▲</span><span><span class="sr-only">Hinweis: </span>1 Warnung – bitte bewerten</span></li>
+                </ul>
+              </section>
+              <section aria-labelledby="f-h-review">
+                <h2 id="f-h-review">Prüfergebnisse</h2>
+                <div class="findings-host" data-model="preview"></div>
+              </section>
+              <section>
+                <form id="approve-form" novalidate>
+                  <label class="checkbox" for="confirm-review"><input type="checkbox" id="confirm-review" aria-describedby="confirm-err" /> <span>Ich habe Inhalt, Preise und Warnungen von Version 1.0 geprüft und gebe das Dokument frei.</span></label>
+                  <p class="field-error" id="confirm-err" hidden>Bestätigen Sie die Prüfung, bevor Sie freigeben.</p>
+                  <div class="row" style="margin-top: 12px">
+                    <button type="submit" class="primary">Freigeben – Status „Final“ setzen</button>
+                  </div>
+                  <p class="hint">Die Freigabe wird mit Ihrem Namen, Zeitpunkt und Version protokolliert. Danach entfällt das Wasserzeichen.</p>
+                </form>
+                <details style="margin-top: 12px">
+                  <summary>Mit Kommentar zurückgeben</summary>
+                  <label for="return-comment" style="margin-top: 8px">Kommentar an Lena Vogt</label>
+                  <textarea id="return-comment" rows="3"></textarea>
+                  <div class="row" style="margin-top: 8px"><button type="button">Zurückgeben</button></div>
+                </details>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Approval denied: missing role (#34) ============ -->
+        <section class="state" data-state="denied" aria-labelledby="h1-denied">
+          <p class="state-caption">Keine Berechtigung – ohne Rolle „Freigebende“ kein Status „Final“ (#34)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="in_review" data-version="1.0" data-lang="de" data-lang-editable="true" data-save="Gespeichert um 11:15" data-h1="h1-denied"></div>
+          <ol class="stepper" data-step="3" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="alert error" role="alert" tabindex="-1" style="margin-bottom: 16px">
+                <h2>Freigabe nicht möglich</h2>
+                <p>Den Status „Final“ dürfen nur Personen mit der Rolle „Freigebende“ setzen. Ihr Dokument wurde nicht verändert.</p>
+              </div>
+              <div class="doc-host" data-doc="de" data-model="preview" data-watermark="ENTWURF" aria-label="Vorschau"></div>
+            </div>
+            <aside class="panel" aria-labelledby="ap-h-denied">
+              <section>
+                <h2 id="ap-h-denied">Freigabe</h2>
+                <p><span class="badge in_review">In Prüfung</span></p>
+                <p>Eingereicht am 24.09.2026 um 11:15. Die Freigabe erfolgt durch die Vertriebsleitung.</p>
+                <p class="hint">Sie erhalten eine Benachrichtigung, sobald das Dokument freigegeben oder mit Kommentar zurückgegeben wurde. Bis dahin können Sie weiter bearbeiten; der Status bleibt „In Prüfung“.</p>
+                <div class="row"><button type="button">Einreichung zurückziehen</button></div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Final ============ -->
+        <section class="state" data-state="final" aria-labelledby="h1-final">
+          <p class="state-caption">Final – freigegeben, protokolliert, ohne Wasserzeichen (#34, #29)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="final" data-version="1.0" data-lang="de" data-lang-editable="false" data-save="Freigegeben am 24.09.2026, 14:02" data-h1="h1-final"></div>
+          <ol class="stepper" data-step="4" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="alert success" role="status" style="margin-bottom: 16px">
+                <p><strong>Version 1.0 ist final.</strong> Freigegeben von Dr. Jonas Keller am 24.09.2026 um 14:02 Uhr.</p>
+              </div>
+              <div class="doc-host" data-doc="de" data-model="preview" aria-label="Vorschau"></div>
+            </div>
+            <aside class="panel" aria-labelledby="log-h-final">
+              <section>
+                <h2 id="log-h-final">Freigabeprotokoll</h2>
+                <div class="log-host" data-log="final"></div>
+              </section>
+              <section aria-labelledby="x-h-final">
+                <h2 id="x-h-final">Export</h2>
+                <p class="hint">Finale Exporte tragen kein Wasserzeichen.</p>
+                <button type="button" class="primary" data-goto="export-done">Exportieren (DOCX und PDF)</button>
+              </section>
+              <section>
+                <h2>Ändern</h2>
+                <p class="hint" id="edit-final-hint">Wenn Sie Angaben ändern, entsteht Version 1.1 und der Status wird auf „In Prüfung“ zurückgesetzt. Eine neue Freigabe ist nötig.</p>
+                <button type="button" data-goto="reverted" aria-describedby="edit-final-hint">Neue Version bearbeiten</button>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ Reverted after change (#34) ============ -->
+        <section class="state" data-state="reverted" aria-labelledby="h1-reverted">
+          <p class="state-caption">Zurückgesetzt – Datenänderung nach „Final“ setzt den Status auf „In Prüfung“ (#34)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="in_review" data-version="1.1" data-lang="de" data-lang-editable="true" data-save="Gespeichert um 15:20" data-h1="h1-reverted"></div>
+          <ol class="stepper" data-step="3" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="alert warning" role="status" style="margin-bottom: 16px">
+                <p><strong>Status auf „In Prüfung“ zurückgesetzt.</strong> Sie haben „Meilenstein M3, Datum“ geändert. Version 1.0 bleibt als finale Fassung im Protokoll; Version 1.1 braucht eine neue Freigabe.</p>
+              </div>
+              <div class="doc-host" data-doc="de" data-model="reverted" data-watermark="ENTWURF" aria-label="Vorschau"></div>
+            </div>
+            <aside class="panel" aria-label="Bearbeiten und Protokoll">
+              <section class="editor-host" data-model="reverted" data-select="sow.milestones[2].date"></section>
+              <section aria-labelledby="f-h-reverted">
+                <h2 id="f-h-reverted">Prüfergebnisse</h2>
+                <div class="findings-host" data-model="reverted"></div>
+              </section>
+              <section>
+                <h2>Freigabeprotokoll</h2>
+                <div class="log-host" data-log="reverted"></div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ============ My documents (#35) ============ -->
+        <section class="state" data-state="documents" data-nav="docs" aria-labelledby="h1-documents">
+          <p class="state-caption">Meine Dokumente – eigene Entwürfe fortsetzen (#35)</p>
+          <div class="page-pad">
+            <div class="toolbar">
+              <div>
+                <h1 id="h1-documents" style="margin: 0; font-size: 28px">Meine Dokumente</h1>
+                <p class="meta" id="docs-count">4 Dokumente · nur Ihre eigenen</p>
+              </div>
+              <button type="button" class="primary" data-goto="start-empty">Neues Dokument</button>
+            </div>
+            <div class="alert info" style="margin-bottom: 16px">
+              <p>Entwürfe werden nach 90 Tagen ohne Änderung automatisch gelöscht. Freigegebene Dokumente bleiben erhalten.</p>
+            </div>
+            <div class="row" style="margin-bottom: 12px; align-items: end">
+              <div style="width: 320px"><label for="doc-search">Suchen</label><input type="text" id="doc-search" aria-describedby="docs-count" /></div>
+              <div style="width: 200px"><label for="doc-filter">Status</label>
+                <select id="doc-filter"><option>Alle</option><option>Entwurf</option><option>In Prüfung</option><option>Final</option></select></div>
+            </div>
+            <table class="data">
+              <caption class="sr-only">Meine Dokumente, sortiert nach „Zuletzt geändert“, neueste zuerst</caption>
+              <thead>
+                <tr>
+                  <th scope="col"><button type="button">Dokument</button></th>
+                  <th scope="col">Typ</th>
+                  <th scope="col">Kunde</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Sprache</th>
+                  <th scope="col" aria-sort="descending"><button type="button">Zuletzt geändert <span aria-hidden="true">▼</span></button></th>
+                  <th scope="col"><span class="sr-only">Aktionen</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>SOW-2026-031 · Copilot-Rollout</strong><br /><span class="hint">15 von 15 Pflichtangaben · Version 1.0</span></td>
+                  <td>SOW</td><td>Fabrikam GmbH</td><td><span class="badge in_review">In Prüfung</span></td><td>DE</td>
+                  <td><time datetime="2026-09-24T11:15">heute, 11:15</time></td>
+                  <td><button type="button" data-goto="loading" aria-label="SOW-2026-031 fortsetzen">Fortsetzen</button></td>
+                </tr>
+                <tr>
+                  <td><strong>RFP-2026-004 · Datenplattform</strong><br /><span class="hint">6 von 11 Pflichtangaben</span></td>
+                  <td>RFP</td><td>Northwind Traders AG</td><td><span class="badge draft">Entwurf</span></td><td>DE</td>
+                  <td><time datetime="2026-09-22T16:40">22.09.2026, 16:40</time></td>
+                  <td><button type="button" data-goto="loading" aria-label="RFP-2026-004 fortsetzen">Fortsetzen</button></td>
+                </tr>
+                <tr>
+                  <td><strong>MSA-2026-002 · Rahmenvertrag</strong><br /><span class="hint">Version 1.0</span></td>
+                  <td>MSA</td><td>Tailspin Toys Ltd.</td><td><span class="badge final">Final</span></td><td>EN</td>
+                  <td><time datetime="2026-09-10T09:05">10.09.2026, 09:05</time></td>
+                  <td><button type="button" data-goto="final" aria-label="MSA-2026-002 öffnen">Öffnen</button></td>
+                </tr>
+                <tr>
+                  <td><strong>CR-2026-003 · Zusatzschulungen</strong><br /><span class="hint">4 von 11 Pflichtangaben · wird in 12 Tagen gelöscht</span></td>
+                  <td>CR</td><td>Fabrikam GmbH</td><td><span class="badge draft">Entwurf</span></td><td>DE</td>
+                  <td><time datetime="2026-07-08T13:20">08.07.2026, 13:20</time></td>
+                  <td><button type="button" data-goto="loading" aria-label="CR-2026-003 fortsetzen">Fortsetzen</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ============ My documents, empty (#35) ============ -->
+        <section class="state" data-state="documents-empty" data-nav="docs" aria-labelledby="h1-documents-empty">
+          <p class="state-caption">Meine Dokumente – leer (#35)</p>
+          <div class="page-pad">
+            <h1 id="h1-documents-empty" style="margin: 0 0 16px; font-size: 28px">Meine Dokumente</h1>
+            <div class="card empty">
+              <div class="big" aria-hidden="true">▢</div>
+              <h2>Sie haben noch keine Dokumente</h2>
+              <p>Starten Sie ein Dokument. Es wird automatisch als Entwurf gespeichert, und Sie können es hier später fortsetzen.</p>
+              <button type="button" class="primary" data-goto="start-empty">Neues Dokument erstellen</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ Save failed (#35) ============ -->
+        <section class="state" data-state="save-failed" aria-labelledby="h1-save-failed">
+          <p class="state-caption">Speichern fehlgeschlagen – Änderungen bleiben im Browser, erneuter Versuch (#35)</p>
+          <div class="docbar" data-customer="Fabrikam GmbH" data-status="draft" data-version="1.0" data-lang="de" data-lang-editable="true" data-save-failed="true" data-h1="h1-save-failed"></div>
+          <ol class="stepper" data-step="2" aria-label="Arbeitsschritte"></ol>
+          <div class="workspace">
+            <div class="col-main">
+              <div class="alert error" role="alert" style="margin-bottom: 16px">
+                <h2>Ihre letzte Änderung ist noch nicht gespeichert</h2>
+                <p>Die Verbindung zum Server ist unterbrochen. Die Änderung bleibt in diesem Fenster erhalten; wir versuchen es alle 10 Sekunden erneut. Schließen Sie das Fenster erst, wenn „Gespeichert“ erscheint.</p>
+                <div class="row"><button type="button" class="primary">Jetzt speichern</button></div>
+              </div>
+              <div class="doc-host" data-doc="de" data-model="preview" data-watermark="ENTWURF" aria-label="Vorschau"></div>
+            </div>
+            <aside class="panel" aria-label="Bearbeiten und Prüfen">
+              <section class="editor-host" data-model="preview"></section>
+              <section>
+                <h2>Export</h2>
+                <p class="hint" id="x-reason-save">Export ist möglich, sobald alle Änderungen gespeichert sind.</p>
+                <button type="button" class="primary" disabled aria-describedby="x-reason-save">Exportieren (DOCX und PDF)</button>
+              </section>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="live" class="sr-only" role="status" aria-live="polite"></div>
+
+    <dialog id="dlg-approve" aria-labelledby="dlg-approve-h" aria-describedby="dlg-approve-d">
+      <h2 id="dlg-approve-h">Version 1.0 final setzen?</h2>
+      <p id="dlg-approve-d">„SOW-2026-031 · Copilot-Rollout“ erhält den Status „Final“. Die Freigabe wird mit Ihrem Namen, dem Zeitpunkt und Version 1.0 protokolliert. Spätere Änderungen an den Angaben setzen den Status auf „In Prüfung“ zurück.</p>
+      <form method="dialog" class="actions">
+        <button value="cancel" autofocus>Abbrechen</button>
+        <button value="ok" class="primary">Final setzen</button>
+      </form>
+    </dialog>
+
+    <script>
+      /* Canvas 001-proposal-wizard – mockup behaviour. Fictional data only; nothing is sent anywhere. */
+      const BASE = {
+        document: { number: 'SOW-2026-031', version: '1.0', date: '2026-09-24' },
+        supplier: { name: 'Contoso Consulting GmbH' },
+        customer: { name: 'Fabrikam GmbH' },
+        msa: { reference: 'MSA-2025-014', date: '2025-03-15' },
+        project: {
+          name: 'Copilot-Rollout',
+          summary: 'Fabrikam führt Microsoft 365 Copilot für 400 Beschäftigte in Vertrieb und Kundenservice ein. Ziel ist eine produktive, sichere Nutzung innerhalb von drei Monaten.',
+          start_date: '2026-11-02', end_date: '2027-01-29',
+          objectives: ['Produktive Nutzung von Copilot durch 400 Beschäftigte', 'Freigegebenes Berechtigungs- und Datenschutzkonzept vor dem Rollout', 'Mindestens 80 % aktive Nutzung vier Wochen nach der letzten Welle']
+        },
+        sow: {
+          scope: {
+            in_scope: ['Readiness-Check von Lizenzen, Berechtigungen und Datenablagen', 'Pilot mit 40 Nutzern inklusive Feedbackrunde', 'Rollout in drei Wellen', 'Schulungen für Anwender und Key User'],
+            out_of_scope: ['Beschaffung von Lizenzen', 'Entwicklung eigener Copilot-Erweiterungen']
+          },
+          deliverables: [
+            { name: 'Readiness-Bericht mit Maßnahmenplan', acceptance: 'Freigabe durch die Projektleitung von Fabrikam' },
+            { name: 'Pilotbericht mit Rollout-Empfehlung', acceptance: 'Abnahme im Lenkungskreis' },
+            { name: 'Schulungsunterlagen und Rollout-Dokumentation', acceptance: 'Übergabe an den IT-Betrieb' }
+          ],
+          milestones: [
+            { name: 'M1 Readiness-Check abgeschlossen', date: '2026-11-20' },
+            { name: 'M2 Pilot abgeschlossen', date: '2026-12-18' },
+            { name: 'M3 Rollout Welle 3 abgeschlossen', date: '2027-01-22' },
+            { name: 'M4 Projektabnahme', date: '2027-01-29' }
+          ]
+        },
+        pricing: { model: 'fixed_price', currency: 'EUR', total: 48000, payment_schedule: [
+          { milestone: 'M1', amount: 14400 }, { milestone: 'M2', amount: 19200 }, { milestone: 'M4', amount: 14400 }] }
+      };
+      const OVERRIDES = {
+        summary: [['sow.milestones[2].date', '2027-02-12']],
+        preview: [['sow.milestones[2].date', '2027-02-12']],
+        validation: [['sow.milestones[2].date', '2027-02-12'], ['project.end_date', '2026-10-29'], ['pricing.payment_schedule[2].amount', 9600]],
+        reverted: [['document.version', '1.1']]
+      };
+      const CHECKED_AT = { summary: '10:58', preview: '11:12', validation: '11:07', reverted: '15:20' };
+
+      const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+      const keys = (p) => p.replace(/\[(\d+)\]/g, '.$1').split('.');
+      const getPath = (o, p) => keys(p).reduce((a, k) => (a == null ? a : a[k]), o);
+      const setPath = (o, p, v) => { const k = keys(p); const last = k.pop(); k.reduce((a, x) => a[x], o)[last] = v; };
+      const idx = (p) => Number((p.match(/\[(\d+)\]/) || [0, 0])[1]);
+
+      const kindOf = (p) => /date$/.test(p) ? 'date' : /(total|amount)$/.test(p) ? 'amount' : p === 'pricing.model' ? 'enum' : p === 'project.summary' ? 'long' : 'text';
+      const READONLY = ['document.version'];
+      const USER_TEXT = /^(project\.(summary|objectives)|sow\.(scope|deliverables|milestones\[\d+\]\.name))/;
+      const MODEL_LABEL = { de: { fixed_price: 'Festpreis', time_and_material: 'Aufwand (Time & Material)' }, en: { fixed_price: 'Fixed price', time_and_material: 'Time and material' } };
+
+      function fmt(v, kind, lang) {
+        if (v == null || v === '') return '–';
+        if (kind === 'date') {
+          const d = new Date(v + 'T00:00:00');
+          return lang === 'en' ? d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : d.toLocaleDateString('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        }
+        if (kind === 'amount') {
+          const n = Number(v).toLocaleString(lang === 'en' ? 'en-US' : 'de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          return lang === 'en' ? 'EUR ' + n : n + ' EUR';
+        }
+        if (kind === 'enum') return MODEL_LABEL[lang][v] || v;
+        return String(v);
+      }
+      const fde = (v, k) => fmt(v, k, 'de');
+
+      function label(p) {
+        const n = idx(p) + 1;
+        const fixed = {
+          'document.number': 'SOW-Nr.', 'document.version': 'Version', 'document.date': 'Datum', 'supplier.name': 'Auftragnehmer', 'customer.name': 'Auftraggeber',
+          'msa.reference': 'Rahmenvertrag (MSA-Referenz)', 'msa.date': 'Datum des Rahmenvertrags', 'project.name': 'Projektname', 'project.summary': 'Projektbeschreibung',
+          'project.start_date': 'Projektbeginn', 'project.end_date': 'Projektende', 'pricing.model': 'Preismodell', 'pricing.currency': 'Währung', 'pricing.total': 'Gesamtpreis',
+          'pricing.payment_schedule': 'Zahlungsplan'
+        };
+        if (fixed[p]) return fixed[p];
+        if (/^project\.objectives/.test(p)) return 'Projektziel ' + n;
+        if (/in_scope/.test(p)) return 'Leistung im Umfang ' + n;
+        if (/out_of_scope/.test(p)) return 'Ausschluss ' + n;
+        if (/deliverables.*name$/.test(p)) return 'Lieferergebnis D' + n + ', Bezeichnung';
+        if (/deliverables.*acceptance$/.test(p)) return 'Lieferergebnis D' + n + ', Abnahmekriterium';
+        if (/milestones.*name$/.test(p)) return 'Meilenstein M' + n + ', Bezeichnung';
+        if (/milestones.*date$/.test(p)) return 'Meilenstein M' + n + ', Datum';
+        if (/payment_schedule.*amount$/.test(p)) return 'Rate ' + n + ', Betrag';
+        return p;
+      }
+
+      /* Local stand-in for the check_plausibility tool: { findings: [{ code, severity, path, message }] } */
+      function checkPlausibility(m) {
+        const f = [];
+        const p = m.project;
+        const rangeOk = p.end_date >= p.start_date;
+        if (!rangeOk) f.push({ code: 'DATE_RANGE_INVALID', severity: 'error', path: 'project.end_date', message: `Das Projektende (${fde(p.end_date, 'date')}) liegt vor dem Projektbeginn (${fde(p.start_date, 'date')}).` });
+        const sum = m.pricing.payment_schedule.reduce((a, r) => a + Number(r.amount || 0), 0);
+        if (Math.abs(sum - m.pricing.total) > 0.005) f.push({ code: 'PAYMENT_SUM_MISMATCH', severity: 'error', path: 'pricing.payment_schedule', message: `Die Summe des Zahlungsplans (${fde(sum, 'amount')}) weicht vom Gesamtpreis (${fde(m.pricing.total, 'amount')}) ab.` });
+        if (rangeOk) m.sow.milestones.forEach((ms, i) => {
+          if (ms.date < p.start_date || ms.date > p.end_date) f.push({ code: 'MILESTONE_OUTSIDE_PERIOD', severity: 'warning', path: `sow.milestones[${i}].date`, message: `Meilenstein M${i + 1} (${fde(ms.date, 'date')}) liegt außerhalb des Projektzeitraums (${fde(p.start_date, 'date')} – ${fde(p.end_date, 'date')}).` });
+        });
+        f.push({ code: 'TOTALS_COMPUTED', severity: 'info', path: 'pricing.total', message: 'Summen und Anteile im Zahlungsplan hat das Prüfwerkzeug berechnet, nicht das Sprachmodell.' });
+        const order = { error: 0, warning: 1, info: 2 };
+        return { findings: f.sort((a, b) => order[a.severity] - order[b.severity]) };
+      }
+
+      const matches = (fp, path) => fp === path || path.startsWith(fp + '[') || path.startsWith(fp + '.');
+      function fieldSeverity(path, findings) {
+        const hit = findings.filter((x) => x.severity !== 'info' && matches(x.path, path));
+        return hit.some((x) => x.severity === 'error') ? 'error' : hit.length ? 'warning' : null;
+      }
+      const groupOf = (p) => /^pricing\.payment_schedule/.test(p) ? 'pricing.payment_schedule' : p;
+      const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+      const SEV = { error: ['✕', 'Fehler'], warning: ['▲', 'Warnung'], info: ['ℹ', 'Hinweis'] };
+
+      const T = {
+        de: { lang: 'de-DE', title: 'Statement of Work', ai: 'KI-generierter Entwurf – vor Verwendung prüfen', ver: 'Version',
+          intro: (s, c, r, d) => `zwischen ${s} („Auftragnehmer“) und ${c} („Auftraggeber“) auf Grundlage des Rahmenvertrags ${r} vom ${d}.`,
+          sec: ['1 Ausgangslage und Ziele', '2 Leistungsumfang', '3 Lieferergebnisse', '4 Meilensteine', '5 Vergütung', '6 Unterschriften'],
+          period: (a, b) => `Projektzeitraum: ${a} bis ${b}`, goals: 'Ziele', inS: 'Im Umfang', outS: 'Nicht im Umfang',
+          del: ['Nr.', 'Lieferergebnis', 'Abnahmekriterium'], ms: ['Meilenstein', 'Datum'], pay: ['Rate', 'Fällig bei', 'Anteil', 'Betrag'], sum: 'Summe',
+          price: (m, t) => `Preismodell: ${m}. Gesamtpreis: ${t} zuzüglich gesetzlicher Umsatzsteuer.`, sign: ['Für den Auftragnehmer', 'Für den Auftraggeber', 'Name, Datum, Unterschrift'] },
+        en: { lang: 'en-US', title: 'Statement of Work', ai: 'AI-generated draft – review before use', ver: 'Version',
+          intro: (s, c, r, d) => `between ${s} (“Supplier”) and ${c} (“Customer”) under Master Service Agreement ${r} dated ${d}.`,
+          sec: ['1 Background and objectives', '2 Scope', '3 Deliverables', '4 Milestones', '5 Fees', '6 Signatures'],
+          period: (a, b) => `Project period: ${a} to ${b}`, goals: 'Objectives', inS: 'In scope', outS: 'Out of scope',
+          del: ['No.', 'Deliverable', 'Acceptance criterion'], ms: ['Milestone', 'Date'], pay: ['Instalment', 'Due at', 'Share', 'Amount'], sum: 'Total',
+          price: (m, t) => `Pricing model: ${m}. Total fee: ${t}, plus statutory VAT.`, sign: ['For the Supplier', 'For the Customer', 'Name, date, signature'] }
+      };
+
+      function renderDoc(host, sec) {
+        const m = sec._m, f = sec._f, lang = host.dataset.doc, t = T[lang];
+        const ro = !sec.querySelector('.editor-host');
+        const fv = (p) => {
+          const kind = kindOf(p), sev = fieldSeverity(p, f);
+          const txt = esc(fmt(getPath(m, p), kind, lang));
+          const lg = lang === 'en' && USER_TEXT.test(p) && kind !== 'date' ? ' lang="de"' : '';
+          const cls = (sev ? ' has-' + sev : '') + (sec._sel && groupOf(p) === sec._sel ? ' selected' : '');
+          const sr = sev ? `<span class="sr-only"> (${SEV[sev][1]})</span>` : '';
+          if (ro || READONLY.includes(p)) return `<span class="fv-ro${cls}" data-fpath="${p}" tabindex="-1"${lg}>${txt}${sr}</span>`;
+          return `<button type="button" class="fv${cls}" data-fpath="${p}"${lg}><span class="sr-only">${esc(label(p))}: </span>${txt}${sr}<span class="sr-only">, bearbeiten</span></button>`;
+        };
+        const list = (base, arr) => '<ul>' + arr.map((_, i) => `<li>${fv(`${base}[${i}]`)}</li>`).join('') + '</ul>';
+        const sched = m.pricing.payment_schedule;
+        const sum = sched.reduce((a, r) => a + Number(r.amount || 0), 0);
+        const wm = host.dataset.watermark;
+        host.innerHTML = `<article class="page" aria-label="${lang === 'en' ? 'Dokumentvorschau, Englisch' : 'Dokumentvorschau'}">
+          ${wm ? `<div class="watermark" aria-hidden="true">${wm}</div>` : ''}
+          ${wm ? `<p class="sr-only">Wasserzeichen: ${wm}</p>` : ''}
+          <p class="ai-note">${t.ai}</p>
+          <p class="hint" style="margin: 0 0 4px">${t.title} · ${fv('document.number')} · ${t.ver} ${fv('document.version')} · ${fv('document.date')}</p>
+          <h3 class="doc-title">${t.title}: ${fv('project.name')}</h3>
+          <p>${t.intro(fv('supplier.name'), fv('customer.name'), fv('msa.reference'), fv('msa.date'))}</p>
+          <h4>${t.sec[0]}</h4>
+          <p>${fv('project.summary')}</p>
+          <p>${t.period(fv('project.start_date'), fv('project.end_date'))}</p>
+          <h5>${t.goals}</h5>${list('project.objectives', m.project.objectives)}
+          <h4>${t.sec[1]}</h4>
+          <h5>${t.inS}</h5>${list('sow.scope.in_scope', m.sow.scope.in_scope)}
+          <h5>${t.outS}</h5>${list('sow.scope.out_of_scope', m.sow.scope.out_of_scope)}
+          <h4>${t.sec[2]}</h4>
+          <table><thead><tr>${t.del.map((h) => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>
+            ${m.sow.deliverables.map((d, i) => `<tr><td>D${i + 1}</td><td>${fv(`sow.deliverables[${i}].name`)}</td><td>${fv(`sow.deliverables[${i}].acceptance`)}</td></tr>`).join('')}</tbody></table>
+          <h4>${t.sec[3]}</h4>
+          <table><thead><tr>${t.ms.map((h) => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>
+            ${m.sow.milestones.map((d, i) => `<tr><td>${fv(`sow.milestones[${i}].name`)}</td><td>${fv(`sow.milestones[${i}].date`)}</td></tr>`).join('')}</tbody></table>
+          <h4>${t.sec[4]}</h4>
+          <p>${t.price(fv('pricing.model'), fv('pricing.total'))}</p>
+          <table><thead><tr>${t.pay.map((h, i) => `<th scope="col"${i > 1 ? ' class="num"' : ''}>${h}</th>`).join('')}</tr></thead><tbody>
+            ${sched.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.milestone)}</td><td class="num">${fmtPct(r.amount / m.pricing.total, lang)}</td><td class="num">${fv(`pricing.payment_schedule[${i}].amount`)}</td></tr>`).join('')}</tbody>
+            <tfoot><tr><td colspan="2">${t.sum}</td><td class="num">${fmtPct(sum / m.pricing.total, lang)}</td><td class="num">${esc(fmt(sum, 'amount', lang))}</td></tr></tfoot></table>
+          <h4>${t.sec[5]}</h4>
+          <table><thead><tr><th scope="col">${t.sign[0]}</th><th scope="col">${t.sign[1]}</th></tr></thead>
+            <tbody><tr><td style="height: 56px">${t.sign[2]}</td><td>${t.sign[2]}</td></tr></tbody></table>
+          <p class="omitted" lang="de">Nur in der Vorschau sichtbar: Ohne Angaben ausgelassen wurden „Rollen und Verantwortlichkeiten“ und „Annahmen“.</p>
+        </article>`;
+      }
+      const fmtPct = (x, lang) => (x * 100).toLocaleString(lang === 'en' ? 'en-US' : 'de-DE', { maximumFractionDigits: 1 }) + ' %';
+    </script>
+    <script>
+      const USERS = {
+        creator: { name: 'Lena Vogt', role: 'Account Manager', ini: 'LV' },
+        approver: { name: 'Dr. Jonas Keller', role: 'Vertriebsleitung · Freigebende', ini: 'JK' }
+      };
+      const STATUS = { draft: ['○', 'Entwurf'], in_review: ['◐', 'In Prüfung'], final: ['✓', 'Final'] };
+      const STEPS = [['Angaben erfassen', 'capture'], ['Vorschau und Prüfung', 'preview'], ['Freigabe', 'review'], ['Export', 'export']];
+      const LOGS = {
+        final: [['Status „Final“ gesetzt', 'Dr. Jonas Keller (Freigebende)', '24.09.2026, 14:02', '1.0'], ['Zur Freigabe eingereicht', 'Lena Vogt', '24.09.2026, 11:15', '1.0'], ['Entwurf erstellt', 'Lena Vogt', '24.09.2026, 10:38', '1.0']]
+      };
+      LOGS.reverted = [['Status auf „In Prüfung“ zurückgesetzt – geändert: Meilenstein M3, Datum', 'Lena Vogt', '24.09.2026, 15:20', '1.1']].concat(LOGS.final);
+      const live = document.getElementById('live');
+      const announce = (msg) => { live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 60); };
+      const $$ = (root, sel) => Array.from(root.querySelectorAll(sel));
+      const sections = $$(document, 'main > .state');
+      const select = document.getElementById('state-select');
+      const optionOrder = Array.from(select.options).map((o) => o.value);
+
+      function initModel(sec) {
+        const host = sec.querySelector('[data-model]');
+        if (!host) return;
+        const key = host.dataset.model;
+        sec._m = JSON.parse(JSON.stringify(BASE));
+        (OVERRIDES[key] || []).forEach(([p, v]) => setPath(sec._m, p, v));
+        sec._f = checkPlausibility(sec._m).findings;
+        sec._checked = CHECKED_AT[key] || '11:12';
+        const pre = sec.querySelector('.editor-host[data-select]');
+        sec._sel = pre ? pre.dataset.select : null;
+      }
+
+      function renderDocbar(el, sec) {
+        const d = el.dataset, key = sec.dataset.state;
+        const [ico, txt] = STATUS[d.status];
+        const title = d.title || `${d.customer || 'Fabrikam'} · Copilot-Rollout`;
+        const langName = d.lang === 'en' ? '<span lang="en">English (en-US)</span>' : 'Deutsch (de-DE)';
+        const lang = d.langEditable === 'true'
+          ? `<span><label for="lang-${key}">Dokumentsprache</label><select id="lang-${key}" data-lang-select><option value="de"${d.lang === 'de' ? ' selected' : ''}>Deutsch (de-DE)</option><option value="en"${d.lang === 'en' ? ' selected' : ''} lang="en">English (en-US)</option></select></span>`
+          : `<span>Dokumentsprache: ${langName}</span>`;
+        const save = d.saveFailed ? '<span class="save failed" role="status"><span aria-hidden="true">✕</span> Nicht gespeichert – neuer Versuch in 10 s</span>' : `<span class="save" role="status"><span aria-hidden="true">✓</span> ${esc(d.save)}</span>`;
+        el.innerHTML = `<h1 id="${d.h1}" tabindex="-1"><span class="doctype">${esc(d.type || 'Statement of Work')}</span>${esc(title)}</h1>
+          <div class="meta"><span class="badge ${d.status}"><span aria-hidden="true">${ico}</span> ${txt}</span><span>Version ${esc(d.version)}</span>${lang}${save}</div>`;
+      }
+
+      function renderStepper(el) {
+        const cur = Number(el.dataset.step);
+        el.innerHTML = STEPS.map(([name, target], i) => {
+          const n = i + 1;
+          if (n < cur) return `<li class="done"><a href="#${target}"><span class="num" aria-hidden="true">✓</span>${name}<span class="sr-only"> (abgeschlossen)</span></a></li>`;
+          if (n === cur) return `<li aria-current="step"><span class="num" aria-hidden="true">${n}</span>${name}<span class="sr-only"> (aktueller Schritt)</span></li>`;
+          return `<li class="upcoming"><span class="num" aria-hidden="true">${n}</span>${name}<span class="sr-only"> (noch nicht erreicht)</span></li>`;
+        }).join('');
+      }
+
+      function counts(f) {
+        const c = { error: 0, warning: 0, info: 0 };
+        f.forEach((x) => c[x.severity]++);
+        return c;
+      }
+      const countText = (c) => `${plural(c.error, 'Fehler', 'Fehler')}, ${plural(c.warning, 'Warnung', 'Warnungen')}, ${plural(c.info, 'Hinweis', 'Hinweise')}`;
+
+      function renderFindings(host, sec) {
+        const f = sec._f, c = counts(f);
+        host.innerHTML = `<p class="hint" style="margin: 0 0 8px">Geprüft um ${sec._checked} Uhr mit <code>check_plausibility</code></p>
+          <ul class="counts" aria-label="Prüfergebnisse nach Schweregrad"><li class="c-error">${plural(c.error, 'Fehler', 'Fehler')}</li><li class="c-warning">${plural(c.warning, 'Warnung', 'Warnungen')}</li><li class="c-info">${plural(c.info, 'Hinweis', 'Hinweise')}</li></ul>
+          <ul class="findings" aria-label="Prüfergebnisse">${f.map((x) => `<li class="finding sev-${x.severity}">
+            <p><span class="sev"><span aria-hidden="true">${SEV[x.severity][0]}</span> ${SEV[x.severity][1]}</span></p>
+            <p>${esc(x.message)}</p>
+            <div class="row" style="justify-content: space-between"><span class="code">${x.code} · ${x.path}</span>
+            <button type="button" class="link" data-select="${x.path}">Zum Feld<span class="sr-only">: ${esc(label(x.path))}</span></button></div></li>`).join('')}</ul>`;
+      }
+
+      function renderErrorLinks(host, sec) {
+        const errs = sec._f.filter((x) => x.severity === 'error');
+        host.innerHTML = errs.map((x) => `<li><button type="button" class="link" data-select="${x.path}">${esc(label(x.path))}: ${esc(x.message)}</button></li>`).join('');
+        const box = host.closest('.alert');
+        box.hidden = errs.length === 0;
+        const h = box.querySelector('[data-err-heading]');
+        if (h) h.textContent = `Export nicht möglich: ${plural(errs.length, 'Fehler', 'Fehler')} gefunden`;
+      }
+
+      function renderGates(sec) {
+        const n = sec._f ? sec._f.filter((x) => x.severity === 'error').length : 0;
+        $$(sec, '[data-gate]').forEach((b) => { b.disabled = n > 0; });
+        $$(sec, '[data-gate-reason]').forEach((p) => { p.textContent = n > 0 ? `Export gesperrt: Beheben Sie zuerst ${plural(n, 'Fehler', 'Fehler')}.` : 'Keine Fehler. Warnungen blockieren den Export nicht; Exporte tragen das Wasserzeichen ENTWURF.'; });
+      }
+
+      function renderLog(host) {
+        host.innerHTML = '<ol class="checklist" aria-label="Protokoll, neueste zuerst">' + LOGS[host.dataset.log].map(([what, who, when, v]) =>
+          `<li><span aria-hidden="true">•</span><span><strong>${what}</strong><br />${who} · <time>${when}</time> · Version ${v}</span></li>`).join('') + '</ol>';
+      }
+
+      const toInput = (v, kind) => kind === 'amount' ? Number(v).toLocaleString('de-DE', { minimumFractionDigits: 2 }) : String(v);
+      const parseAmount = (s) => Number(String(s).replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, ''));
+
+      function renderEditor(host, sec) {
+        const key = sec.dataset.state, id = 'ed-' + key, p = sec._sel;
+        if (!p) {
+          host.innerHTML = `<h2>Wert bearbeiten</h2><p class="hint">Wählen Sie in der Vorschau einen unterstrichenen Wert, um ihn hier zu bearbeiten. Größere Änderungen beschreiben Sie im Chat.</p>`;
+          return;
+        }
+        const hits = sec._f.filter((x) => x.severity !== 'info' && matches(x.path, p) || (p === 'pricing.payment_schedule' && x.path === p));
+        const err = hits.find((x) => x.severity === 'error'), warn = hits.find((x) => x.severity === 'warning');
+        const desc = [err ? id + '-err' : '', warn ? id + '-warn' : '', id + '-hint'].filter(Boolean).join(' ');
+        const msgs = (err ? `<p class="field-error" id="${id}-err">Fehler: ${esc(err.message)}</p>` : '') + (warn ? `<p class="hint" id="${id}-warn" style="color: var(--warning)"><strong>Warnung:</strong> ${esc(warn.message)}</p>` : '');
+        let field;
+        if (p === 'pricing.payment_schedule') {
+          const rows = sec._m.pricing.payment_schedule;
+          const sum = rows.reduce((a, r) => a + Number(r.amount), 0);
+          field = `<fieldset aria-describedby="${desc}" style="margin: 0"><legend style="font-size: 15px">Zahlungsplan</legend>
+            ${rows.map((r, i) => `<div style="margin-bottom: 8px"><label for="${id}-${i}">Rate ${i + 1} – fällig bei ${r.milestone}</label>
+              <div class="amount"><input type="text" inputmode="decimal" id="${id}-${i}" data-path="pricing.payment_schedule[${i}].amount" value="${toInput(r.amount, 'amount')}"${err ? ' aria-invalid="true"' : ''} /><span>EUR</span></div></div>`).join('')}
+            ${msgs}<p class="hint" id="${id}-hint">Summe ${fde(sum, 'amount')} von ${fde(sec._m.pricing.total, 'amount')} Gesamtpreis. Die Summe berechnet das Prüfwerkzeug.</p></fieldset>`;
+        } else {
+          const kind = kindOf(p), v = getPath(sec._m, p);
+          const inv = err ? ' aria-invalid="true"' : '';
+          const attrs = `id="${id}" data-path="${p}" aria-describedby="${desc}" required${inv}`;
+          let input;
+          if (kind === 'date') input = `<input type="date" ${attrs} value="${v}" />`;
+          else if (kind === 'amount') input = `<div class="amount"><input type="text" inputmode="decimal" ${attrs} value="${toInput(v, kind)}" /><span>EUR</span></div>`;
+          else if (kind === 'enum') input = `<select ${attrs}><option value="fixed_price"${v === 'fixed_price' ? ' selected' : ''}>Festpreis</option><option value="time_and_material"${v === 'time_and_material' ? ' selected' : ''}>Aufwand (Time &amp; Material)</option></select>`;
+          else if (kind === 'long') input = `<textarea rows="5" ${attrs}>${esc(v)}</textarea>`;
+          else input = `<input type="text" ${attrs} value="${esc(v)}" />`;
+          field = `<div><label for="${id}">${esc(label(p))}</label>${input}${msgs}<p class="hint" id="${id}-hint">Pflichtangabe · Feld <code>${p}</code></p></div>`;
+        }
+        host.innerHTML = `<form class="editor" data-editor novalidate aria-labelledby="${id}-h">
+          <h2 id="${id}-h">Wert bearbeiten</h2>${field}
+          <p class="field-error" id="${id}-req" hidden>Geben Sie einen Wert ein.</p>
+          <div class="row"><button type="submit" class="primary">Übernehmen</button><button type="button" data-editor-cancel>Abbrechen</button></div>
+          <p class="hint">Nach dem Übernehmen wird das Dokument neu geprüft und automatisch gespeichert.</p></form>`;
+      }
+
+      function renderSection(sec) {
+        $$(sec, '.docbar[data-status]').forEach((el) => renderDocbar(el, sec));
+        $$(sec, '.stepper').forEach(renderStepper);
+        $$(sec, '.log-host').forEach(renderLog);
+        if (!sec._m) return;
+        $$(sec, '.doc-host').forEach((h) => renderDoc(h, sec));
+        $$(sec, '.findings-host').forEach((h) => renderFindings(h, sec));
+        $$(sec, '.error-links').forEach((h) => renderErrorLinks(h, sec));
+        $$(sec, '.editor-host').forEach((h) => renderEditor(h, sec));
+        renderGates(sec);
+      }
+
+      function selectField(sec, path) {
+        if (!sec.querySelector('.doc-host')) { setState('preview', false); sec = sections.find((s) => s.dataset.state === 'preview'); }
+        const editor = sec.querySelector('.editor-host');
+        if (!editor) {
+          const target = sec.querySelector(`[data-fpath="${path}"], [data-fpath^="${path}["], [data-fpath^="${path}."]`);
+          if (target) { target.scrollIntoView({ block: 'center' }); target.focus(); }
+          return;
+        }
+        sec._sel = groupOf(path);
+        renderSection(sec);
+        const input = editor.querySelector('input, select, textarea');
+        const fvEl = sec.querySelector(`.fv[data-fpath^="${sec._sel}"]`);
+        if (fvEl) fvEl.scrollIntoView({ block: 'nearest' });
+        if (input) input.focus();
+      }
+
+      function applyEdit(form, sec) {
+        const inputs = $$(form, '[data-path]');
+        const empty = inputs.find((i) => String(i.value).trim() === '');
+        const req = form.querySelector('[id$="-req"]');
+        if (empty) { req.hidden = false; empty.setAttribute('aria-invalid', 'true'); empty.setAttribute('aria-describedby', (empty.getAttribute('aria-describedby') || '') + ' ' + req.id); empty.focus(); return; }
+        inputs.forEach((i) => setPath(sec._m, i.dataset.path, kindOf(i.dataset.path) === 'amount' ? parseAmount(i.value) : i.value));
+        const before = counts(sec._f).error;
+        sec._f = checkPlausibility(sec._m).findings;
+        sec._checked = 'gerade eben';
+        const save = sec.querySelector('.docbar');
+        if (save) save.dataset.save = 'Gespeichert gerade eben';
+        const sel = sec._sel;
+        renderSection(sec);
+        $$(sec, `.fv[data-fpath^="${sel}"]`).forEach((el) => { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 900); });
+        const c = counts(sec._f);
+        let msg = `Übernommen: ${label(sel)}. Neu geprüft: ${countText(c)}.`;
+        if (before > 0 && c.error === 0) msg += ' Alle Fehler behoben, Export ist jetzt möglich.';
+        announce(msg);
+        const still = sec.querySelector('.editor-host [aria-invalid="true"]');
+        (still || sec.querySelector('.editor-host button[type="submit"]')).focus();
+      }
+
+      /* Streaming agent reply (capture state) */
+      const STREAM = ['Danke, übernommen: Rahmenvertrag MSA-2025-014, Projektbeschreibung und Leistungsumfang mit 4 Punkten. Es fehlen noch 3 Pflichtangaben:',
+        '1. Welche Ziele soll das Projekt erreichen? Zwei bis drei messbare Ziele genügen.',
+        '2. Welche Lieferergebnisse übergeben Sie, und woran erkennt Fabrikam die Abnahme?',
+        '3. Welche Meilensteine mit Datum planen Sie? Nennen Sie dazu bitte Projektbeginn und Projektende.'];
+      let streamTimer = null;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function setStreamUi(done, stopped) {
+        const bubble = document.getElementById('stream-capture');
+        bubble.setAttribute('aria-busy', String(!done));
+        document.getElementById('typing-capture').hidden = done;
+        document.getElementById('send-capture').disabled = !done;
+        document.getElementById('stop-capture').hidden = done;
+        document.getElementById('send-reason-capture').textContent = done ? (stopped ? 'Antwort gestoppt. Sie können weiterschreiben.' : '') : 'Senden ist möglich, sobald der Agent fertig geantwortet hat.';
+      }
+      function startStream() {
+        clearInterval(streamTimer);
+        const bubble = document.getElementById('stream-capture');
+        const words = STREAM.map((p) => p.split(' '));
+        const total = words.reduce((a, w) => a + w.length, 0);
+        const paint = (n) => {
+          let left = n;
+          bubble.innerHTML = words.map((w) => { const k = Math.max(0, Math.min(w.length, left)); left -= w.length; return k ? `<p>${esc(w.slice(0, k).join(' '))}</p>` : ''; }).join('') + (n < total ? '<span class="caret" aria-hidden="true"></span>' : '');
+        };
+        setStreamUi(false);
+        if (reduced) { paint(total); setStreamUi(true); return; }
+        let n = 0;
+        streamTimer = setInterval(() => {
+          n += 1; paint(n);
+          if (n >= total) { clearInterval(streamTimer); setStreamUi(true); announce('Der Agent hat geantwortet: 3 Fragen zu Zielen, Lieferergebnissen und Meilensteinen.'); }
+        }, 45);
+      }
+      function stopStream() {
+        clearInterval(streamTimer);
+        const caret = document.querySelector('#stream-capture .caret');
+        if (caret) caret.remove();
+        document.getElementById('stream-capture').insertAdjacentHTML('beforeend', '<p class="hint">Antwort gestoppt.</p>');
+        setStreamUi(true, true);
+        announce('Antwort gestoppt.');
+      }
+
+      function setState(key, userInitiated) {
+        const valid = key === 'core' || key === 'all' || sections.some((s) => s.dataset.state === key);
+        if (!valid) return;
+        const stacked = key === 'core' || key === 'all';
+        document.body.classList.toggle('stacked', stacked);
+        sections.forEach((s) => {
+          const on = key === 'all' || (key === 'core' ? !!s.dataset.core : s.dataset.state === key);
+          s.dataset.active = String(on);
+          s.style.order = key === 'core' ? s.dataset.core || 0 : optionOrder.indexOf(s.dataset.state);
+        });
+        select.value = key;
+        if (location.hash.slice(1) !== key) history.replaceState(null, '', '#' + key);
+        const single = stacked ? null : sections.find((s) => s.dataset.state === key);
+        const u = single && single.dataset.role === 'approver' ? USERS.approver : USERS.creator;
+        document.getElementById('user-name').textContent = u.name;
+        document.getElementById('user-role').textContent = u.role;
+        document.getElementById('user-initials').textContent = u.ini;
+        document.getElementById('nav-approvals').hidden = u !== USERS.approver;
+        const nav = single ? single.dataset.nav || (single.dataset.role === 'approver' ? 'approvals' : '') : '';
+        $$(document, 'header.app nav a').forEach((a) => a.dataset.nav === nav ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+        const opt = select.options[select.selectedIndex];
+        document.title = `${opt ? opt.text : key} – Canvas 001 Angebotsgenerator`;
+        const cap = sections.find((s) => s.dataset.state === 'capture');
+        if (cap.dataset.active === 'true') startStream(); else clearInterval(streamTimer);
+        if (userInitiated) {
+          if (stacked || !single) { document.getElementById('main').focus(); return; }
+          const target = single.querySelector('.overlay h2, .alert[tabindex="-1"]:not([hidden]), h1');
+          if (target) { if (!target.hasAttribute('tabindex')) target.tabIndex = -1; target.focus(); }
+        }
+      }
+
+      /* Events */
+      select.addEventListener('change', () => setState(select.value, true));
+      window.addEventListener('hashchange', () => setState(location.hash.slice(1), true));
+      document.getElementById('replay').addEventListener('click', () => { const cap = sections.find((s) => s.dataset.state === 'capture'); if (cap.dataset.active === 'true') startStream(); else setState('capture', true); });
+      document.getElementById('stop-capture').addEventListener('click', stopStream);
+
+      document.addEventListener('click', (e) => {
+        const sec = e.target.closest('.state');
+        const fvEl = e.target.closest('.fv');
+        if (fvEl && sec) { selectField(sec, fvEl.dataset.fpath); return; }
+        const sel = e.target.closest('[data-select]');
+        if (sel && sec) { selectField(sec, sel.dataset.select); return; }
+        const go = e.target.closest('[data-goto]');
+        if (go && !go.disabled) { setState(go.dataset.goto, true); return; }
+        const foc = e.target.closest('[data-focus]');
+        if (foc) { document.getElementById(foc.dataset.focus).focus(); return; }
+        const cancel = e.target.closest('[data-editor-cancel]');
+        if (cancel && sec) { const prev = sec._sel; sec._sel = null; renderSection(sec); const back = sec.querySelector(`.fv[data-fpath^="${prev}"]`); if (back) back.focus(); return; }
+        const choice = e.target.closest('.choice-grid button');
+        if (choice) { $$(choice.parentElement, 'button').forEach((b) => b.setAttribute('aria-pressed', String(b === choice))); announce(`Dokumenttyp gewählt: ${choice.querySelector('strong').textContent}. Der Agent fragt nun die Pflichtangaben ab.`); }
+      });
+
+      document.addEventListener('change', (e) => {
+        if (!e.target.matches('[data-lang-select]')) return;
+        const st = e.target.closest('.state').dataset.state;
+        const en = e.target.value === 'en';
+        if (st === 'preview' && en) { setState('preview-en', true); return; }
+        if (st === 'preview-en' && !en) { setState('preview', true); return; }
+        announce(en ? 'Dokumentsprache: Englisch. Vorschau und Export verwenden die englische Vorlage. Die Oberfläche bleibt deutsch.' : 'Dokumentsprache: Deutsch.');
+      });
+
+      document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (form.method === 'dialog') return;
+        e.preventDefault();
+        const sec = form.closest('.state');
+        if (form.matches('[data-editor]')) { applyEdit(form, sec); return; }
+        if (form.id === 'start-form') {
+          const type = form.querySelector('input[name="doctype"]:checked');
+          const intent = form.querySelector('#intent').value.trim();
+          const errBox = document.getElementById('start-error');
+          if (!type && !intent) { errBox.hidden = false; errBox.focus(); return; }
+          errBox.hidden = true;
+          setState(type || /\b(sow|rfi|rfp|msa|cr)\b/i.test(intent) ? 'capture' : 'capture-unclear', true);
+          return;
+        }
+        if (form.id === 'approve-form') {
+          const box = document.getElementById('confirm-review');
+          const err = document.getElementById('confirm-err');
+          if (!box.checked) { err.hidden = false; box.setAttribute('aria-invalid', 'true'); box.focus(); return; }
+          err.hidden = true; box.removeAttribute('aria-invalid');
+          const dlg = document.getElementById('dlg-approve');
+          dlg.returnValue = '';
+          dlg.showModal();
+          return;
+        }
+        if (form.classList.contains('composer')) announce('Im Mockup ist der Agent nicht verbunden. Die Nachricht wurde nicht gesendet.');
+      });
+      document.getElementById('dlg-approve').addEventListener('close', (e) => { if (e.target.returnValue === 'ok') { setState('final', true); announce('Version 1.0 ist final. Die Freigabe wurde protokolliert.'); } });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey && e.target.matches('.composer textarea')) {
+          e.preventDefault();
+          const btn = e.target.form.querySelector('button[type="submit"]');
+          if (!btn.disabled) e.target.form.requestSubmit(btn);
+        }
+      });
+
+      sections.forEach((s) => { initModel(s); renderSection(s); });
+      const initial = location.hash.slice(1);
+      setState(initial === 'core' || initial === 'all' || sections.some((s) => s.dataset.state === initial) ? initial : 'core', false);
+    </script>
+  </body>
+</html>
