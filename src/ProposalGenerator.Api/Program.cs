@@ -4,7 +4,7 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// NEGATIVE CONTROL: /health intentionally unmapped
+app.MapHealthChecks("/health");
 
 app.Run();
 
