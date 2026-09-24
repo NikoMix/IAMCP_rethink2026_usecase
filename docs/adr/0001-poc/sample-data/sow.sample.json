@@ -1,0 +1,77 @@
+{
+  "document": {
+    "number": "SOW-2026-0042",
+    "version": "1.0",
+    "date": "2026-10-01",
+    "status": "draft",
+    "language": "en",
+    "confidentiality": "Confidential"
+  },
+  "supplier": {
+    "name": "Contoso Consulting GmbH",
+    "legal_form": "GmbH",
+    "address": "Musterstraße 1, 10115 Berlin, Germany",
+    "contact": { "name": "Erika Mustermann", "email": "erika.mustermann@contoso.example", "phone": "+49 30 0000000" },
+    "signatory": { "name": "Erika Mustermann", "title": "Managing Director" }
+  },
+  "customer": {
+    "name": "Fabrikam Maschinenbau AG",
+    "legal_form": "AG",
+    "address": "Beispielweg 7, 80331 München, Germany",
+    "contact": { "name": "Max Mustermann", "email": "max.mustermann@fabrikam.example" },
+    "signatory": { "name": "Max Mustermann", "title": "Head of IT" }
+  },
+  "msa": { "reference": "MSA-2025-007", "date": "2025-11-15" },
+  "project": {
+    "name": "Customer Portal Modernisation",
+    "summary": "Fabrikam wants to replace its legacy customer portal with a cloud-native application on Azure.",
+    "objectives": [
+      "Migrate the customer portal to Azure Container Apps",
+      "Reduce page load times by 50 %",
+      "Introduce single sign-on with Microsoft Entra ID"
+    ],
+    "start_date": "2026-11-02",
+    "end_date": "2027-03-31"
+  },
+  "sow": {
+    "scope": {
+      "in_scope": [ "Architecture and design", "Implementation of the portal front end and API", "Data migration of active customer accounts" ],
+      "out_of_scope": [ "Changes to the ERP system", "24/7 operations after go-live" ]
+    },
+    "phases": [
+      { "name": "Discovery", "description": "Workshops to confirm requirements, architecture and the migration approach." },
+      { "name": "Build", "description": "Iterative delivery in two-week sprints with a demo at the end of each sprint." },
+      { "name": "Transition", "description": "Data migration, cut-over and hypercare for four weeks." }
+    ],
+    "deliverables": [
+      { "id": "D1", "name": "Solution architecture", "description": "Architecture document including security concept", "acceptance_criteria": "Approved by the Customer architecture board", "due_date": "2026-12-04" },
+      { "id": "D2", "name": "Portal release 1.0", "description": "Production-ready portal | API (cut-over plan included)", "acceptance_criteria": "All acceptance tests pass; no open severity 1 defects", "due_date": "2027-03-01" },
+      { "id": "D3", "name": "Operations handbook", "description": "Runbooks for *monitoring* and incident response", "acceptance_criteria": "Reviewed by Customer operations", "due_date": "2027-03-31" }
+    ],
+    "milestones": [
+      { "name": "Architecture approved", "date": "2026-12-04", "deliverables": [ "D1" ] },
+      { "name": "Go-live", "date": "2027-03-01", "deliverables": [ "D2", "D3" ] }
+    ],
+    "roles": [
+      { "role": "Project manager", "party": "Supplier", "name": "Erika Mustermann", "responsibilities": "Planning, reporting, risk management" },
+      { "role": "Product owner", "party": "Customer", "responsibilities": "Backlog prioritisation and acceptance" }
+    ],
+    "customer_dependencies": [ "Access to the test environment (SAP_QA) by 2026-11-16", "Named product owner available two days per week" ],
+    "assumptions": [ "The Customer provides test data that contains no personal data", "Work is performed remotely unless agreed otherwise" ],
+    "acceptance_days": 10,
+    "reporting_cadence": "bi-weekly"
+  },
+  "pricing": {
+    "model": "capped_tm",
+    "currency": "EUR",
+    "total": 184000,
+    "cap": 200000,
+    "rate_card": [
+      { "role": "Solution architect", "daily_rate": 1600, "days": 40, "subtotal": 64000 },
+      { "role": "Senior developer", "daily_rate": 1200, "days": 100, "subtotal": 120000 }
+    ],
+    "payment_schedule": [
+      { "trigger": "Monthly in arrears", "amount": "per timesheet", "date": "end of each month" }
+    ]
+  }
+}
