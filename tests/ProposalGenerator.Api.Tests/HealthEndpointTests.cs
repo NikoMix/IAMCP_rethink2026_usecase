@@ -6,7 +6,7 @@ namespace ProposalGenerator.Api.Tests;
 public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
     : IClassFixture<WebApplicationFactory<Program>>
 {
-    [Fact(Skip = "NEGATIVE CONTROL: zero tests executed")]
+    [Fact]
     public async Task GetHealth_ReturnsOkWithHealthyStatus()
     {
         using var client = factory.CreateClient();
