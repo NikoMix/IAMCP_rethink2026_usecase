@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP=}"
+    },
+    "principalId": {
+      "value": "${AZURE_PRINCIPAL_ID=}"
+    },
+    "principalType": {
+      "value": "${AZURE_PRINCIPAL_TYPE=User}"
+    },
+    "foundryProjectName": {
+      "value": "${FOUNDRY_PROJECT_NAME=proposal-generator}"
+    },
+    "modelDeploymentName": {
+      "value": "${FOUNDRY_MODEL_DEPLOYMENT_NAME=chat}"
+    },
+    "modelName": {
+      "value": "${FOUNDRY_MODEL_NAME=gpt-5.4-mini}"
+    },
+    "modelVersion": {
+      "value": "${FOUNDRY_MODEL_VERSION=2026-03-17}"
+    },
+    "modelSkuName": {
+      "value": "${FOUNDRY_MODEL_SKU=DataZoneStandard}"
+    },
+    "modelCapacity": {
+      "value": "${FOUNDRY_MODEL_CAPACITY=50}"
+    },
+    "appFoundryRole": {
+      "value": "${APP_FOUNDRY_ROLE=Foundry User}"
+    },
+    "draftRetentionDays": {
+      "value": "${STORAGE_DRAFT_RETENTION_DAYS=30}"
+    },
+    "blobSoftDeleteRetentionDays": {
+      "value": "${STORAGE_SOFT_DELETE_DAYS=7}"
+    },
+    "logRetentionInDays": {
+      "value": "${LOG_RETENTION_DAYS=30}"
+    }
+  }
+}
