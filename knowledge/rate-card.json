@@ -1,0 +1,145 @@
+{
+  "$comment": "FICTIONAL SAMPLE DATA for the IAMCP GitHub hands-on workshop. Fabrikam Consulting GmbH is not a real company and these rates are not an offer. Replace this file with your own rate card before any real use.",
+  "sample_data": true,
+  "rate_card_id": "RC-2026",
+  "supplier": "Fabrikam Consulting GmbH (fictional)",
+  "currency": "EUR",
+  "valid_from": "2026-01-01",
+  "valid_to": "2026-12-31",
+  "unit": "person_day",
+  "day_definition": "One person day equals 8 working hours.",
+  "notes": [
+    "All daily rates are net amounts and exclude value-added tax.",
+    "Travel and expenses are not included and are charged at cost after prior approval.",
+    "A role that is not listed in this rate card has no agreed rate. Ask the account manager for the rate instead of estimating one.",
+    "Discounts require written approval by sales management and are documented in the SOW, not in this rate card."
+  ],
+  "roles": [
+    {
+      "id": "engagement-manager",
+      "role": "Engagement Manager",
+      "aliases": ["Engagement Lead"],
+      "daily_rate": 1650,
+      "description": "Owns the customer relationship and commercial success of the engagement; chairs the steering committee."
+    },
+    {
+      "id": "project-manager",
+      "role": "Project Manager",
+      "aliases": ["PM"],
+      "daily_rate": 1200,
+      "description": "Plans and controls scope, schedule, budget, risks and reporting."
+    },
+    {
+      "id": "solution-architect",
+      "role": "Solution Architect",
+      "aliases": [],
+      "daily_rate": 1450,
+      "description": "Designs the end-to-end solution and owns architecture decisions."
+    },
+    {
+      "id": "cloud-architect",
+      "role": "Cloud Architect",
+      "aliases": ["Azure Architect"],
+      "daily_rate": 1400,
+      "description": "Designs cloud platforms, landing zones, networking and identity."
+    },
+    {
+      "id": "ai-engineer",
+      "role": "AI Engineer",
+      "aliases": ["Machine Learning Engineer"],
+      "daily_rate": 1300,
+      "description": "Builds generative AI agents, prompt flows, evaluations and model integrations."
+    },
+    {
+      "id": "data-scientist",
+      "role": "Data Scientist",
+      "aliases": [],
+      "daily_rate": 1250,
+      "description": "Analyses data, develops models and defines evaluation metrics."
+    },
+    {
+      "id": "security-consultant",
+      "role": "Security Consultant",
+      "aliases": ["Security Architect"],
+      "daily_rate": 1350,
+      "description": "Assesses threats, designs security controls and supports compliance evidence."
+    },
+    {
+      "id": "senior-consultant",
+      "role": "Senior Consultant",
+      "aliases": ["Principal Consultant"],
+      "daily_rate": 1200,
+      "description": "Leads workstreams, analyses processes and shapes solutions together with the customer."
+    },
+    {
+      "id": "senior-developer",
+      "role": "Senior Developer",
+      "aliases": ["Senior Software Engineer", "Lead Developer"],
+      "daily_rate": 1150,
+      "description": "Implements complex features, reviews code and mentors developers."
+    },
+    {
+      "id": "developer",
+      "role": "Developer",
+      "aliases": ["Software Engineer"],
+      "daily_rate": 1000,
+      "description": "Implements features, tests and automation."
+    },
+    {
+      "id": "data-engineer",
+      "role": "Data Engineer",
+      "aliases": [],
+      "daily_rate": 1100,
+      "description": "Builds data pipelines, data models and data quality checks."
+    },
+    {
+      "id": "devops-engineer",
+      "role": "DevOps Engineer",
+      "aliases": ["Platform Engineer"],
+      "daily_rate": 1050,
+      "description": "Builds CI/CD pipelines, infrastructure as code and observability."
+    },
+    {
+      "id": "business-analyst",
+      "role": "Business Analyst",
+      "aliases": ["Requirements Engineer"],
+      "daily_rate": 1000,
+      "description": "Elicits and documents requirements, processes and acceptance criteria."
+    },
+    {
+      "id": "scrum-master",
+      "role": "Scrum Master",
+      "aliases": ["Agile Coach"],
+      "daily_rate": 1050,
+      "description": "Facilitates the agile delivery process and removes impediments."
+    },
+    {
+      "id": "ux-designer",
+      "role": "UX Designer",
+      "aliases": ["UI Designer"],
+      "daily_rate": 1000,
+      "description": "Designs user journeys, prototypes and accessible user interfaces."
+    },
+    {
+      "id": "test-engineer",
+      "role": "Test Engineer",
+      "aliases": ["QA Engineer"],
+      "daily_rate": 900,
+      "description": "Plans and automates tests and reports quality findings."
+    },
+    {
+      "id": "technical-writer",
+      "role": "Technical Writer",
+      "aliases": [],
+      "daily_rate": 800,
+      "description": "Writes user, operations and training documentation."
+    },
+    {
+      "id": "trainer",
+      "role": "Trainer",
+      "aliases": ["Enablement Coach"],
+      "daily_rate": 950,
+      "description": "Prepares and delivers training sessions and enablement material."
+    }
+  ]
+}
