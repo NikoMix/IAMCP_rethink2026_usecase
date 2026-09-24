@@ -9,20 +9,29 @@ required_fields:
   - document.version
   - document.date
   - supplier.name
-  - supplier.address
+  - supplier.address.street
+  - supplier.address.postal_code
+  - supplier.address.city
+  - supplier.address.country
   - supplier.signatory.name
   - customer.name
-  - customer.address
+  - customer.address.street
+  - customer.address.postal_code
+  - customer.address.city
+  - customer.address.country
   - customer.signatory.name
   - legal.governing_law
   - legal.jurisdiction
   - legal.payment_terms_days
-  - legal.liability_cap
+  - legal.liability_cap.amount
+  - legal.liability_cap.currency
 optional_fields:
   - supplier.legal_form
+  - supplier.address.region
   - supplier.registration_number
   - supplier.signatory.title
   - customer.legal_form
+  - customer.address.region
   - customer.registration_number
   - customer.signatory.title
   - legal.term_years
@@ -68,8 +77,8 @@ clauses:
 
 ## Parties
 
-- **{{ supplier.name }}**{% if supplier.legal_form %} ({{ supplier.legal_form }}){% endif %}, registered at {{ supplier.address }}{% if supplier.registration_number %} under number {{ supplier.registration_number }}{% endif %} ("Supplier"); and
-- **{{ customer.name }}**{% if customer.legal_form %} ({{ customer.legal_form }}){% endif %}, registered at {{ customer.address }}{% if customer.registration_number %} under number {{ customer.registration_number }}{% endif %} ("Customer").
+- **{{ supplier.name }}**{% if supplier.legal_form %} ({{ supplier.legal_form }}){% endif %}, registered at {{ supplier.address.street }}, {{ supplier.address.postal_code }} {{ supplier.address.city }}{% if supplier.address.region %}, {{ supplier.address.region }}{% endif %}, {{ supplier.address.country }}{% if supplier.registration_number %}, under number {{ supplier.registration_number }}{% endif %} ("Supplier"); and
+- **{{ customer.name }}**{% if customer.legal_form %} ({{ customer.legal_form }}){% endif %}, registered at {{ customer.address.street }}, {{ customer.address.postal_code }} {{ customer.address.city }}{% if customer.address.region %}, {{ customer.address.region }}{% endif %}, {{ customer.address.country }}{% if customer.registration_number %}, under number {{ customer.registration_number }}{% endif %} ("Customer").
 
 Supplier and Customer are each a "Party" and together the "Parties".
 
@@ -167,7 +176,7 @@ that third party's intellectual property rights, subject to prompt notice and re
 
 ## 13. Limitation of liability
 
-13.1 Each Party's aggregate liability under this Agreement is limited to {{ legal.liability_cap }}.
+13.1 Each Party's aggregate liability under this Agreement is limited to {{ legal.liability_cap.currency }} {{ legal.liability_cap.amount }}.
 
 13.2 Neither Party is liable for indirect or consequential damages or for loss of profit.
 
