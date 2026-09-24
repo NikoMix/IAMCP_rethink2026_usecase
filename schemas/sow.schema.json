@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/NikoMix/IAMCP_rethink2026_usecase/main/schemas/sow.schema.json",
+  "title": "Statement of Work (SOW)",
+  "description": "Data for templates/sow.md. A SOW is governed by an MSA (msa.reference).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["document", "supplier", "customer", "msa", "project", "sow", "pricing"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "document": {
+      "$ref": "common.schema.json#/$defs/document",
+      "properties": { "type": { "const": "sow" } }
+    },
+    "supplier": { "$ref": "common.schema.json#/$defs/party" },
+    "customer": { "$ref": "common.schema.json#/$defs/party" },
+    "msa": {
+      "description": "Governing Master Service Agreement.",
+      "$ref": "common.schema.json#/$defs/governingDocument"
+    },
+    "project": {
+      "$ref": "common.schema.json#/$defs/project",
+      "required": ["name", "summary", "objectives"]
+    },
+    "sow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "deliverables", "milestones"],
+      "properties": {
+        "scope": { "$ref": "common.schema.json#/$defs/scope" },
+        "phases": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/phase" }
+        },
+        "deliverables": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "common.schema.json#/$defs/deliverable",
+            "required": ["id", "name", "acceptance_criteria", "due_date"]
+          }
+        },
+        "milestones": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "common.schema.json#/$defs/milestone" }
+        },
+        "roles": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/role" }
+        },
+        "customer_dependencies": { "$ref": "common.schema.json#/$defs/textList" },
+        "assumptions": { "$ref": "common.schema.json#/$defs/assumptions" },
+        "acceptance_days": {
+          "description": "Business days the customer has to review a deliverable.",
+          "$ref": "common.schema.json#/$defs/positiveInteger"
+        },
+        "reporting_cadence": { "$ref": "common.schema.json#/$defs/text" },
+        "steering_cadence": { "$ref": "common.schema.json#/$defs/text" }
+      }
+    },
+    "pricing": {
+      "$ref": "common.schema.json#/$defs/pricing",
+      "required": ["model", "currency", "total"]
+    }
+  }
+}
