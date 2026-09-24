@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: proposal-generator
+metadata:
+  template: iamcp-proposal-generator
+infra:
+  provider: bicep
+  path: infra
+  module: main
+# Services (the ASP.NET Core API / Blazor app on Container Apps) are added once
+# src/ProposalGenerator.Api exists. Until then `azd up` provisions infrastructure only.
